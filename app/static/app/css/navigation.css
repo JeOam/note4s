@@ -1,0 +1,61 @@
+a:hover, a:visited, a:link, a:active {
+  text-decoration: none;
+}
+
+.navigation-container {
+  background-color: #F5F5F5;
+  height: 44px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.22);
+  display: block;
+}
+.navigation-container > div {
+  padding-top: 6px;
+  width: 970px;
+  margin: 0px auto 0px auto;
+}
+
+.navigation-table {
+  border-spacing: 0px;
+  border-width: 0px 0px 0px 0px;
+  width: 100%;
+}
+
+.navigation-brand {
+  color: #778087;
+  line-height: 30px;
+  font-size: 26px;
+  margin-left: 12px;
+}
+.navigation-brand:hover {
+  color: #4078C0;
+}
+
+.navigation-search {
+  width: 276px;
+  height: 28px;
+  background-size: 276px 28px;
+  background-image: url('/static/app/img/qbar_light.png') ;
+  background-repeat: no-repeat;
+  display: inline-block;
+}
+.navigation-search > input {
+  border: none;
+  width: 222px;
+  height: 26px;
+  margin: 0px 0px 2px 30px;
+  background-color: transparent;
+  font-size: 12px;
+  line-height: 16px;
+  outline: none;
+}
+
+.navigation-link {
+  padding-top: 2px;
+  font-size: 13px;
+}
+.navigation-link > a {
+  color: #778087;
+}
+.navigation-link > a:hover {
+  color: #4078C0;
+}
