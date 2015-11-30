@@ -2,7 +2,18 @@
 
 {% block main_pannel %}
   <ul class="content-tab">
-    <li class="active"><a href="#">My Notes</a></li>
+    <li class="active">
+      <a href="#">
+        <i class="fa fa-unlock"></i><!-- class="fa fa-lock" -->
+        &nbsp;My Notes
+        <select class="notebook-select">
+          <option value="volvo">我的 Python  笔记</option>
+          <option value="saab">我的 Python  笔记笔记笔记1234</option>
+          <option value="mercedes">Mercedes</option>
+          <option value="audi">Audi</option>
+        </select>
+      </a>
+    </li>
     <li><a href="#">Activity</a></li>
   </ul>
 {% endblock %}
