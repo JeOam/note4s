@@ -24,23 +24,6 @@
 
 {% block custom_js %}
   <script type="text/javascript" src="{% static "app/js/jquery.js" %}"></script>
+  <script type="text/javascript" src="{% static "app/js/Sortable.js" %}"></script>
   <script type="text/javascript" src="{% static "app/js/index_content.js" %}"></script>
-{#<script type="text/javascript" src="{% static "app/js/Sortable.js" %}"></script>#}
-{#<script type="text/javascript">#}
-{#'use strict';#}
-{#var list = document.getElementById("main-sortable");#}
-{#Sortable.create(list, {#}
-{#  animation: 150,#}
-{#  forceFallback: true,#}
-{#});#}
-{##}
-{#var groups = document.getElementById("main-sortable").getElementsByClassName('item-sortable');#}
-{#[].forEach.call(groups, function (el){#}
-{#  Sortable.create(el, {#}
-{#    group: 'groups',#}
-{#    animation: 150,#}
-{#    forceFallback: true,#}
-{#  });#}
-{#});#}
-{#</script>#}
 {% endblock %}

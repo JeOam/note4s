@@ -71,3 +71,24 @@
 .notebook-select:focus {
   outline: none;
 }
+
+#main-sortable {
+  border: 1px solid #e2e2e2;
+  margin: 42px 8px 12px 8px;
+  padding: 10px;
+  text-align: left;
+}
+
+.sub-sortable {
+  margin-bottom: 15px;
+}
+.title-sortable {
+  margin-bottom: 10px;
+  font-size: 15px;
+
+}
+.item-sortable > li {
+  margin-bottom: 8px;
+  margin-left: 15px;
+  font-size: 14px;
+}

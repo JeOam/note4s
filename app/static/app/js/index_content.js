@@ -14,3 +14,18 @@ lockBtn.on("click", function(event){
       lockBtn.addClass("fa-lock");
   }
 });
+
+var list = document.getElementById("main-sortable");
+Sortable.create(list, {
+    animation: 150,
+    forceFallback: true,
+});
+
+var groups = document.getElementById("main-sortable").getElementsByClassName('item-sortable');
+[].forEach.call(groups, function (el){
+    Sortable.create(el, {
+        group: 'groups',
+        animation: 150,
+        forceFallback: true,
+    });
+});
