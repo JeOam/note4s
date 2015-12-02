@@ -48,6 +48,14 @@
   cursor: pointer;
 }
 
+#lock-btn {
+  padding-left: 0;
+  padding-right: 0;
+  border: 0;
+  background-color: rgba(255, 0, 0, 0);
+  outline: none;
+}
+
 .notebook-select {
   background-color: #fff;
   max-width: 158px;
