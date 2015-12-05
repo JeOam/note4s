@@ -1,11 +1,12 @@
 # coding=utf-8
 
-from django.conf.urls import include, url
-from .views import hello, index
+from django.conf.urls import url
+from .views import index, create
 
 __author__ = 'JeOam'
 
 
 urlpatterns = [
-    url(r'^$', index)
+    url(r'create$', create),
+    url(r'^$', index),
 ]

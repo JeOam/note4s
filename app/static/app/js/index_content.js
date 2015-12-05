@@ -4,16 +4,6 @@
 
 "use strict";
 
-var lockBtn = $("#lock-btn")
-lockBtn.on("click", function(event){
-  if (lockBtn.hasClass("fa-lock")) {
-      lockBtn.removeClass("fa-lock");
-      lockBtn.addClass("fa-unlock");
-  } else {
-      lockBtn.removeClass("fa-unlock");
-      lockBtn.addClass("fa-lock");
-  }
-});
 
 var list = document.getElementById("main-sortable");
 Sortable.create(list, {
@@ -28,4 +18,19 @@ var groups = document.getElementById("main-sortable").getElementsByClassName('it
         animation: 150,
         forceFallback: true,
     });
+});
+
+var lockBtn = $("#lock-btn")
+lockBtn.on("click", function(event){
+  if (lockBtn.hasClass("fa-lock")) {
+      lockBtn.removeClass("fa-lock");
+      $(".title-sortable").addClass("cursor-move");
+      $(".item-sortable>li").addClass("cursor-move");
+      lockBtn.addClass("fa-unlock");
+  } else {
+      lockBtn.removeClass("fa-unlock");
+      $(".title-sortable").removeClass("cursor-move");
+      $(".item-sortable>li").removeClass("cursor-move");
+      lockBtn.addClass("fa-lock");
+  }
 });
