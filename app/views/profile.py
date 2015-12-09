@@ -4,5 +4,5 @@ from django.shortcuts import render_to_response
 
 __author__ = 'JeOam'
 
-def create(request):
-    return render_to_response("app/create.html")
+def profile(request):
+    return render_to_response("app/profile.html")
