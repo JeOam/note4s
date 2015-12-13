@@ -5,7 +5,6 @@ from .views import index, create, profile
 
 __author__ = 'JeOam'
 
-
 urlpatterns = [
     url(r'create$', create),
     url(r'profile$', profile),

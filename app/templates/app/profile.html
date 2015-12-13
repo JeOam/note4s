@@ -8,12 +8,14 @@
   {% load staticfiles %}
   <link rel="stylesheet" href="{% static "app/css/base.css" %}">
   <link rel="stylesheet" href="{% static "app/css/navigation.css" %}">
+  <link rel="stylesheet" href="{% static "app/css/main_container.css" %}">
+  <link rel="stylesheet" href="{% static "app/css/profile_container.css" %}">
 {% endblock %}
 
 
 {% block content %}
 {% include 'app/navigation.html' %}
-
+{% include "app/profile_content.html" %}
 {% endblock %}
 
 
