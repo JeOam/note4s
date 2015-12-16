@@ -1,8 +1,20 @@
 body {
-    padding: 0;
-    margin: 0;
-    font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", Tahoma, "Hiragino Sans GB", "Microsoft Yahei", sans-serif;
+  padding: 0;
+  margin: 0;
+  font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", Tahoma, "Hiragino Sans GB", "Microsoft Yahei", sans-serif;
 }
+
 div {
-    display: block;
+  display: block;
+}
+
+.clearfix:before {
+  display: table;
+  content: "";
+}
+
+.clearfix:after {
+  display: table;
+  clear: both;
+  content: "";
 }

@@ -19,7 +19,7 @@
 .content-tab>li>a {
   padding: 7px 15px;
   border: 1px solid #ddd;
-  min-width: 306px;
+  width: 334px;
   background-color: #f6f6f6;
   text-align: center;
   color: #333;

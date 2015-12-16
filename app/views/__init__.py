@@ -3,5 +3,6 @@
 from .index import hello, index
 from .create import create
 from .profile import profile
+from .hello import hello
 
 __author__ = 'JeOam'
