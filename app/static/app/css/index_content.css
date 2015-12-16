@@ -85,6 +85,9 @@
 .cursor-move{
   cursor: move;
 }
+.sortable-chosen {
+  opacity: 0.2;
+}
 .title-sortable {
   margin-bottom: 15px;
   font-size: 15px;
