@@ -6,11 +6,42 @@ from .base import BaseModel
 
 __author__ = 'JeOam'
 
+
+class NoteBook(BaseModel):
+    """
+    笔记分类的最大类别
+    """
+    name = models.CharField(max_length=200)
+    custom_user = models.ForeignKey('CustomUser',
+                                    db_column='custom_user_uuid',
+                                    null=True)
+
+    def __str__(self):
+        return str(self.name)
+
+
+class NoteSection(BaseModel):
+    """
+    把一些笔记归类在 章/模块 单位上；
+    分类级别比 NoteBook 小一个层级
+    """
+    name = models.CharField(max_length=200, unique=True)
+    note_book = models.ForeignKey('NoteBook',
+                                  db_column='note_book_uuid',
+                                  null=True)
+
+    def __str__(self):
+        return str(self.name)
+
+
 class Note(BaseModel):
     """
     一个笔记，站内内容的的核心组成元素
     """
-    title = models.CharField(max_length=100)
+    note_section = models.ForeignKey('NoteSection',
+                                     db_column='note_section_uuid',
+                                     null=True)
+    title = models.CharField(max_length=100, unique=True)
     content = models.TextField()
 
     def __str__(self):
@@ -22,7 +53,8 @@ class SubNote(BaseModel):
     一个笔记对应多个子笔记
     """
     note = models.ForeignKey('Note',
-                             db_column='note_uuid')
+                             db_column='note_uuid',
+                             null=True)
     content = models.TextField()
 
     def __str__(self):

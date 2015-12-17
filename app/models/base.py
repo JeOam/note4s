@@ -5,6 +5,7 @@ from django.db import models
 
 __author__ = 'JeOam'
 
+
 class BaseModel(models.Model):
     class Meta:
         abstract = True

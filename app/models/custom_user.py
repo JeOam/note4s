@@ -7,6 +7,7 @@ from .base import BaseModel
 
 __author__ = 'JeOam'
 
+
 class CustomUser(BaseModel):
     """
     自定义的 User 表
@@ -16,4 +17,4 @@ class CustomUser(BaseModel):
     avatar = models.CharField(max_length=200)
 
     def __str__(self):
-        return str(self.user.nickname)
+        return str(self.nickname)
