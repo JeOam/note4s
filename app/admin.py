@@ -1,3 +1,16 @@
-from django.contrib import admin
+# coding=utf-8
 
-# Register your models here.
+from django.contrib import admin
+from django.db.models.base import ModelBase
+from app import models
+
+__author__ = 'JeOam'
+
+model_list = []
+for m in dir(models):
+    attr = getattr(models, m)
+    if isinstance(attr, ModelBase):
+        model_list.append(attr)
+
+for model in model_list:
+    admin.site.register(model)
