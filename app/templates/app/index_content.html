@@ -7,9 +7,10 @@
         <button type="button" id="lock-btn" class="fa fa-lock"></button>
         &nbsp;My Notes
         <select class="notebook-select">
-          <option value="python">Python Note Navigation</option>
-          <option value="iOS">iOS Note Navigation</option>
-          <option value="JS">JS Note Navigation</option>
+          {% for note_book in note_books %}
+            <option value={{ note_book.uuid_str }}>{{ note_book.name }}</option>
+          {% endfor %}
+          <option value="0">Add or Edit</option>
         </select>
       </a>
     </li>
@@ -17,6 +18,7 @@
   </ul>
 
   <div id="main-sortable">
+  {% for se %}
     <div class="sub-sortable">
       <div class="title-sortable">Section 1:</div>
       <div class="item-sortable">

@@ -34,3 +34,10 @@ lockBtn.on("click", function(event){
       lockBtn.addClass("fa-lock");
   }
 });
+
+$('.notebook-select').on("change", function(event){
+    var notebookSelect = $(".notebook-select")[0];
+    if (notebookSelect.value == '0'){
+        window.location.href = '/edit-notebook';
+    }
+});

@@ -25,7 +25,7 @@ SECRET_KEY = 'i6i$i5_d-q**++$-0w$+#niix=&9@54vr4=meq)coc!4@qh-6u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -49,6 +49,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # "app.middleware.AuthMiddleware",
 ]
 
 ROOT_URLCONF = 'note4s.urls'
