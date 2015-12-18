@@ -1,0 +1,28 @@
+{% extends "app/base.html" %}
+
+{% block title %}
+  <title>New Note</title>
+{% endblock %}
+
+{% block custom_css %}
+  {% load staticfiles %}
+  <link rel="stylesheet" href="{% static "app/css/base.css" %}">
+  <link rel="stylesheet" href="{% static "app/css/navigation.css" %}">
+  <link rel="stylesheet" href="{% static "app/css/note_detail.css" %}">
+
+{% endblock %}
+
+
+{% block content %}
+  {% include 'app/navigation.html' %}
+
+  <div class="note-container">
+    <div class="note-sub-container">
+    </div>
+  </div>
+{% endblock %}
+
+
+{% block custom_js %}
+  <script type="text/javascript" src="{% static "app/js/jquery.js" %}"></script>
+{% endblock %}

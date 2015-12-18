@@ -8,13 +8,7 @@ div {
   display: block;
 }
 
-.clearfix:before {
-  display: table;
-  content: "";
-}
-
-.clearfix:after {
-  display: table;
-  clear: both;
-  content: "";
+a {
+    color: #4078c0;
+    text-decoration: none;
 }

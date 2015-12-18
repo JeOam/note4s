@@ -18,37 +18,24 @@
   </ul>
 
   <div id="main-sortable">
-  {% for se %}
-    <div class="sub-sortable">
-      <div class="title-sortable">Section 1:</div>
-      <div class="item-sortable">
-        <li>Test</li>
-        <li>Test</li>
-      </div>
-    </div>
-    <div class="sub-sortable">
-      <div class="title-sortable">外部链接：</div>
-      <div class="item-sortable">
-        <li>Salted Password Hashing - Doing it Right</li>
-        <li>The Hitchhiker’s Guide to Python</li>
-        <li>Python 3 support graph for 360 most popular Python packages!</li>
-        <li>POST vs GET</li>
-        <li>Discover and discuss the best dev tools and cloud infrastructure services | StackShare</li>
-        <li>如何实现 C/C++ 与 Python 的通信？</li>
-      </div>
-    </div>
-    <div class="sub-sortable">
-      <div class="title-sortable">Section 3:</div>
-      <div class="item-sortable">
-        <li><a href="#">Test</a></li>
-        <li>Test</li>
-        <li>Test</li>
-        <li>Test</li>
-      </div>
-    </div>
+    {% if session_note_dict %}
+      {% for session, note_list in session_note_dict.items %}
+        <div class="sub-sortable">
+          <div class="title-sortable">{{ session.name }}</div>
+          <div class="item-sortable">
+            {% for note in note_list %}
+              <li><a href="{{ note.link }}">{{ note.title }}</a></li>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      TODO: empty page
+    {% endif %}
+
   </div>
   <div class="add-session-container">
-  New Session:
+    New Session:
     <input/>
     <button>Add</button>
   </div>

@@ -2,14 +2,16 @@
 
 from django.conf.urls import url
 from .views import index, create, profile, hello, \
-    index_edit_notebook
+    index_edit_notebook, note_detail
 
 __author__ = 'JeOam'
 
 urlpatterns = [
-    url(r'hello$', hello),
-    url(r'create$', create),
-    url(r'profile$', profile),
-    url(r'edit-notebook$', index_edit_notebook),
+    url(r'^hello$', hello),
+    url(r'^create$', create),
+    url(r'^profile$', profile),
+    url(r'^edit-notebook$', index_edit_notebook),
+    url(r'^note/(?P<uuid_str>[\w-]+)$', note_detail),
+
     url(r'^$', index),
 ]
