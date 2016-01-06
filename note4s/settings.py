@@ -121,3 +121,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+GIT_REPO_LOCATION = "/Users/JeOam/Git/"
