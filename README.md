@@ -5,7 +5,3 @@
 
 admin
 admin123
-
-
-testtest
-testtesttest
