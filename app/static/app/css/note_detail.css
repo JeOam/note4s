@@ -18,3 +18,84 @@
   margin-left: 8px;
   box-sizing: border-box;
 }
+
+.note-title-container {
+  font-size: 16px;
+  color: #666;
+  padding-bottom: 17px;
+}
+
+.note-content-container {
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+
+.note-meta-container {
+  border: 1px solid #ddd;
+  margin: -1px -1px -1px -1px;
+  border-radius: 3px;
+  padding: 10px 10px 10px 10px;
+  background-color: #f7f7f7;
+  color: gray;
+  font-size: 12px;
+}
+
+.note-content {
+  padding: 15px 15px 15px 15px;
+}
+
+.note-sub-content-container {
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  margin: 20px 20px 20px 20px;
+
+}
+
+.note-sub-meta-container {
+  border: 1px solid #ddd;
+  margin: -1px -1px -1px -1px;
+  border-radius: 3px;
+  padding: 8px 8px 8px 8px;
+  background-color: #f2f8fa;
+  color: gray;
+  font-size: 12px;
+}
+
+.note-sub-content {
+  padding: 15px 15px 15px 15px;
+}
+
+.write-sub-note {
+  padding: 10px 15px 10px 10px;
+}
+
+.write-sub-note > textarea {
+  display: block;
+  width: 100%;
+  min-height: 100px;
+  max-height: 500px;
+  resize: vertical;
+  background-color: #fafafa;
+  border: 1px solid #ccc;
+}
+
+.append-btn {
+  float: right;
+  color: #fff;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.15);
+  background-color: #60b044;
+  background-image: -webkit-linear-gradient(#8add6d, #60b044);
+  background-image: linear-gradient(#8add6d, #60b044);
+  border-color: #5ca941;
+  position: relative;
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 20px;
+  border: 1px solid #d5d5d5;
+  border-radius: 3px;
+  -webkit-user-select: none;
+  -webkit-appearance: none;
+
+}

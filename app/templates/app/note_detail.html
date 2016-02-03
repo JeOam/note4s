@@ -1,11 +1,12 @@
 {% extends "app/base.html" %}
 
 {% block title %}
-  <title>New Note</title>
+  <title>Note Detail</title>
 {% endblock %}
 
 {% block custom_css %}
   {% load staticfiles %}
+  <link rel="stylesheet" href="{% static "app/css/highlight.css" %}">
   <link rel="stylesheet" href="{% static "app/css/base.css" %}">
   <link rel="stylesheet" href="{% static "app/css/navigation.css" %}">
   <link rel="stylesheet" href="{% static "app/css/note_detail.css" %}">
@@ -17,7 +18,44 @@
   {% include 'app/navigation.html' %}
 
   <div class="note-container">
+    <!-- Main Content -->
     <div class="note-sub-container">
+      <div class="note-title-container">
+        This is title.
+      </div>
+      <div class="note-content-container">
+        <div class="note-meta-container">
+          头像、作者、发表时间、Revisions、版权声明
+        </div>
+        <div class="note-content">
+          {{ note_content | safe }}
+        </div>
+      </div>
+
+      <!-- Sub Content -->
+      <div class="note-sub-content-container">
+        <div class="note-sub-meta-container">
+          头像、作者、发表时间、Revisions、版权声明
+        </div>
+        <div class="note-sub-content">
+          {{ note_content | safe }}
+        </div>
+      </div>
+      <!-- Form Content -->
+      <div class="note-sub-content-container">
+        <form accept-charset="UTF-8" action="/JeOam/2e9388481a1c7388048e/subnote" data-type="json" method="post">
+          <div></div>
+          <div class="write-sub-note">
+            <textarea placeholder="Append a note" aria-label="Note body"></textarea>
+
+            <p class="drag-and-drop"></p>
+
+            <div class="form-action">
+              <button type="submit" class="append-btn">Append</button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 {% endblock %}
