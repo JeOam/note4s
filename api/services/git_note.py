@@ -39,15 +39,6 @@ def note_history(uuid_str, note_uuid_str, commit_count):
     for commit1, commit2 in zip(commits, commits[1:]):
         commit_diff_list.append(repo.git.diff(commit2, commit1))
 
-def git_tag_list(uuid_str):
-    """
-    获取项目的 tag list.
-    """
-    git_path = settings.GIT_REPO_LOCATION + uuid_str
-    repo = Repo(git_path)
-    tags = [tag.name for tag in reversed(repo.tags)]
-    return tags
-
 def git_commit_list(uuid_str, begin=2, end=10):
     """
     获取 commit 列表数据，数据元素为：

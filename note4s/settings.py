@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "app",
+    'rest_framework',
+    'rest_framework.authtoken',
+    "api"
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -49,7 +51,6 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "app.middleware.AuthMiddleware",
 ]
 
 ROOT_URLCONF = 'note4s.urls'
@@ -122,5 +123,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
+#     'PAGE_SIZE': 10
+# }
 
 GIT_REPO_LOCATION = "/Users/JeOam/Git/"

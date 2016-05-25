@@ -5,3 +5,4 @@ pytest>=2.8.5
 gunicorn>=19
 tzlocal>=1.2
 Pygments>=2.0.2
+djangorestframework>=3.3.3

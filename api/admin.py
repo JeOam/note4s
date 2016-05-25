@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 from django.db.models.base import ModelBase
-from app import models
+from api import models
 
 __author__ = 'JeOam'
 
