@@ -3,14 +3,20 @@
 from rest_framework import viewsets
 from rest_framework import permissions
 
-from .serializers import UserSerializer, NoteSerializer, SubNoteSerializer
-from .models import CustomUser, Note, SubNote
+from .serializers import UserSerializer, NoteBookSerializer, NoteSerializer, SubNoteSerializer
+from .models import CustomUser,NoteBook, NoteSection, Note, SubNote
 from .permissions import IsOwnerOrReadOnly
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly)
+
+class NotebookViewSet(viewsets.ModelViewSet):
+    queryset = NoteBook.objects.all()
+    serializer_class = NoteBookSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly)
 

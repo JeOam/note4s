@@ -40,6 +40,9 @@ class Note(BaseModel):
     """
     一个笔记，站内内容的的核心组成元素
     """
+    custom_user = models.ForeignKey('CustomUser',
+                                    db_column='custom_user_uuid',
+                                    null=True)
     note_section = models.ForeignKey('NoteSection',
                                      db_column='note_section_uuid',
                                      null=True,

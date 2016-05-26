@@ -6,6 +6,7 @@
     * Copyright (C) 2016 GridSafe, Inc.
 """
 from rest_framework import permissions
+from api.models import Note
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -19,4 +20,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return True
 
         # Write permissions are only allowed to the owner of the snippet
-        return obj.owner == request.user
+        if isinstance(obj, Note):
+            return obj.custom_user.user == request.user
+        else:
+            return obj.owner == request.user
