@@ -12,9 +12,8 @@ class CustomUser(BaseModel):
     """
     自定义的 User 表
     """
-    user = models.OneToOneField(User, blank=True, null=True)
-    nickname = models.CharField(max_length=50)
+    user = models.OneToOneField(User, blank=True, null=True, related_name='CustomUser')
     avatar = models.CharField(max_length=200)
 
     def __str__(self):
-        return str(self.nickname)
+        return str(self.user.username)
