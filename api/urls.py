@@ -6,8 +6,10 @@ from rest_framework import routers
 from api import views
 
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'notes', views.NoteViewSet)
+router.register(r'user', views.UserViewSet)
+router.register(r'notebook', views.NotebookViewSet)
+router.register(r'note', views.NoteViewSet)
+router.register(r'sub_note', views.SubNoteViewSet)
 
 
 # Wire up our API using automatic URL routing.

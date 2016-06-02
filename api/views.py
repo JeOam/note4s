@@ -4,7 +4,7 @@ from rest_framework import viewsets
 from rest_framework import permissions
 
 from .serializers import CustomUserSerializer, NoteBookSerializer, NoteSerializer, SubNoteSerializer
-from .models import CustomUser,NoteBook, NoteSection, Note, SubNote
+from .models import CustomUser, NoteBook, NoteSection, Note, SubNote
 from .permissions import IsOwnerOrReadOnly
 
 

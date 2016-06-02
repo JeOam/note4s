@@ -47,7 +47,7 @@ class Note(BaseModel):
                                      db_column='note_section_uuid',
                                      null=True,
                                      related_name='notes')
-    title = models.CharField(max_length=100, unique=True)
+    title = models.CharField(max_length=100)
     content = models.TextField()
 
     def __str__(self):
@@ -60,7 +60,8 @@ class SubNote(BaseModel):
     """
     note = models.ForeignKey('Note',
                              db_column='note_uuid',
-                             null=True,
+                             blank=False,
+                             null=False,
                              related_name='sub_notes')
     content = models.TextField()
 
