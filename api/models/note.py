@@ -26,10 +26,10 @@ class NoteSection(BaseModel):
     把一些笔记归类在 章/模块 单位上；
     分类级别比 NoteBook 小一个层级
     """
-    note_book = models.ForeignKey('NoteBook',
-                                  db_column='note_book_uuid',
-                                  null=True,
-                                  related_name='note_sections')
+    notebook = models.ForeignKey('NoteBook',
+                                 db_column='notebook_uuid',
+                                 null=True,
+                                 related_name='note_sections')
     name = models.CharField(max_length=200, unique=True)
 
     def __str__(self):

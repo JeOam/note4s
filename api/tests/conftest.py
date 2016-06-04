@@ -52,3 +52,14 @@ def test_note(client, token):
                            format='json',
                            HTTP_AUTHORIZATION='Token {}'.format(token))
     return response.data
+
+
+@pytest.fixture()
+def test_notebook(client, token):
+    response = client.post("/api/notebook/",
+                           {
+                               "name": "test_notebook_name"
+                           },
+                           format='json',
+                           HTTP_AUTHORIZATION='Token {}'.format(token))
+    return response.data

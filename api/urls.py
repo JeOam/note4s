@@ -8,6 +8,7 @@ from api import views
 router = routers.DefaultRouter()
 router.register(r'user', views.UserViewSet)
 router.register(r'notebook', views.NotebookViewSet)
+router.register(r'note_section', views.NoteSectionViewSet)
 router.register(r'note', views.NoteViewSet)
 router.register(r'sub_note', views.SubNoteViewSet)
 
