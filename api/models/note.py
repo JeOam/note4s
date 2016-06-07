@@ -1,6 +1,7 @@
 # coding=utf-8
 
 from django.db import models
+from django.contrib.admin import ModelAdmin, TabularInline
 
 from .base import BaseModel
 
@@ -36,6 +37,25 @@ class NoteSection(BaseModel):
         return str(self.name)
 
 
+class NoteSectionInline(TabularInline):
+    model = NoteSection
+
+
+class NoteBookAdmin(ModelAdmin):
+    inlines = [NoteSectionInline, ]
+    list_display = ('uuid', 'custom_user', 'name', 'created_at', 'updated_at')
+    list_editable = ('name',)
+    search_fields = ('name',)
+    ordering = ('updated_at',)
+
+
+class NoteSectionAdmin(ModelAdmin):
+    list_display = ('uuid', 'notebook', 'name', 'created_at', 'updated_at')
+    list_editable = ('name',)
+    search_fields = ('name',)
+    ordering = ('updated_at',)
+
+
 class Note(BaseModel):
     """
     一个笔记，站内内容的的核心组成元素
@@ -67,3 +87,22 @@ class SubNote(BaseModel):
 
     def __str__(self):
         return 'SubNote for ' + str(self.note.title)
+
+
+class SubNoteInline(TabularInline):
+    model = SubNote
+
+
+class NoteAdmin(ModelAdmin):
+    inlines = [SubNoteInline, ]
+    list_display = ('uuid', 'custom_user', 'note_section', 'title', 'updated_at')
+    list_editable = ('title',)
+    search_fields = ('title',)
+    ordering = ('updated_at',)
+
+
+class SubNoteAdmin(ModelAdmin):
+    list_display = ('uuid', 'note', 'content', 'updated_at')
+    list_editable = ('content',)
+    search_fields = ('content',)
+    ordering = ('updated_at',)

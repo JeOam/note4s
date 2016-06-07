@@ -1,8 +1,8 @@
 # coding=utf-8
 
 from django.db import models
+from django.contrib.admin import ModelAdmin
 from django.contrib.auth.models import User
-
 from .base import BaseModel
 
 __author__ = 'JeOam'
@@ -17,3 +17,8 @@ class CustomUser(BaseModel):
 
     def __str__(self):
         return str(self.user.username)
+
+
+class CustomUserAdmin(ModelAdmin):
+    list_display = ('uuid', 'user', 'avatar', 'created_at', 'updated_at')
+    ordering = ('updated_at', )

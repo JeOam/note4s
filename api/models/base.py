@@ -16,8 +16,8 @@ class BaseModel(models.Model):
 
     @property
     def uuid_str(self):
-        return str(self.uuid).replace("-", "")
+        return self.uuid.hex
 
     @property
     def created_at_str(self):
-        return self.created_at.strftime("%Y-%m-%d %H:%M:%S %Z")
+        return self.created_at.strftime("%Y-%m-%d %H:%M:%S")

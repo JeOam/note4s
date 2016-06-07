@@ -6,11 +6,16 @@ from api import models
 
 __author__ = 'JeOam'
 
-model_list = []
-for m in dir(models):
-    attr = getattr(models, m)
-    if isinstance(attr, ModelBase):
-        model_list.append(attr)
+_model_dict = {}
+_attribute_names = dir(models)
+for model_name in _attribute_names:
+    model = getattr(models, model_name)
+    if isinstance(model, ModelBase):
+        admin_model_name = model_name + "Admin"
+        if admin_model_name in _attribute_names:
+            _model_dict[model] = getattr(models, admin_model_name)
+        else:
+            _model_dict[model] = None
 
-for model in model_list:
-    admin.site.register(model)
+for model, admin_model in _model_dict.items():
+    admin.site.register(model, admin_class=admin_model)
