@@ -39,7 +39,7 @@ def token(client):
                            },
                            format='json')
     client.cookies = SimpleCookie()
-    return response.data["key"]
+    return response.data["data"]["key"]
 
 
 @pytest.fixture()
@@ -51,7 +51,7 @@ def test_note(client, token):
                            },
                            format='json',
                            HTTP_AUTHORIZATION='Token {}'.format(token))
-    return response.data
+    return response.data["data"]
 
 
 @pytest.fixture()
@@ -62,4 +62,4 @@ def test_notebook(client, token):
                            },
                            format='json',
                            HTTP_AUTHORIZATION='Token {}'.format(token))
-    return response.data
+    return response.data["data"]

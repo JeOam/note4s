@@ -13,12 +13,9 @@ from api.models import CustomUser
 @pytest.mark.usefixtures('client')
 def test_registration_failed(client):
     response = client.post("/api/rest-auth/registration/", format='json')
-    required = ['This field is required.']
-    assert response.status_code == 400
-    assert response.data["username"] == required
-    assert response.data["email"] == required
-    assert response.data["password1"] == required
-    assert response.data["password2"] == required
+    assert response.status_code == 200
+    assert response.data["status"] == "FAILURE"
+    assert response.data["message"] == '注册出错'
 
 
 @pytest.mark.django_db
@@ -31,9 +28,9 @@ def test_registration_success(client):
                                "password1": "test_password",
                                "password2": "test_password"},
                            format='json')
-    assert response.status_code == 201
-    assert response.data.get("key")
-    assert len(response.data.get("key")) == 40
+    assert response.status_code == 200
+    assert response.data["status"] == "SUCCESS"
+    assert len(response.data["data"].get("key")) == 40
 
     user = User.objects.filter(email="test@test.com").first()
     assert user
@@ -51,6 +48,5 @@ def test_login_email(client):
                            },
                            format='json')
     assert response.status_code == 200
-    assert response.data.get("key")
-    assert len(response.data.get("key")) == 40
-
+    assert response.data["status"] == "SUCCESS"
+    assert len(response.data["data"]["key"]) == 40
