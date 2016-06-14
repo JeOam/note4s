@@ -39,7 +39,7 @@ def test_registration_success(client):
 
 
 @pytest.mark.django_db
-@pytest.mark.usefixtures('client', 'registered')
+@pytest.mark.usefixtures('client', 'test_user')
 def test_login_email(client):
     response = client.post("/api/rest-auth/login/",
                            {

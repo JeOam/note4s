@@ -10,6 +10,15 @@ from api.models import NoteBook
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures('client')
+def test_get_notebooks_visitor(client):
+    response = client.get("/api/notebook/",
+                          format='json')
+    # import pytest
+    # pytest.set_trace()
+    assert response.status_code == 200
+
+@pytest.mark.django_db
 @pytest.mark.usefixtures('client', 'token')
 def test_get_notebooks(client, token):
     response = client.get("/api/notebook/",
@@ -38,7 +47,7 @@ def test_create_notebook(client, token):
 def test_create_note_section(client, token, test_notebook):
     response1 = client.post("/api/note_section/",
                            {
-                               "notebook_uuid": test_notebook["uuid"],
+                               "notebook_uuid": test_notebook.uuid_str,
                                "name": "test_note_section_name",
                            },
                            format='json',
@@ -51,6 +60,6 @@ def test_create_note_section(client, token, test_notebook):
                            format='json',
                            HTTP_AUTHORIZATION='Token {}'.format(token))
     assert response2.status_code
-    assert response2.data["data"]["results"][0]["name"] == test_notebook["name"]
+    assert response2.data["data"]["results"][0]["name"] == test_notebook.name
     assert len(response2.data["data"]["results"][0]["note_sections"]) == 1
     assert response2.data["data"]["results"][0]["note_sections"][0]["name"] == "test_note_section_name"

@@ -8,7 +8,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_auth.serializers import UserDetailsSerializer
-from rest_auth.registration.serializers import RegisterSerializer
 
 from .models import CustomUser, Note, SubNote, NoteBook, NoteSection
 
@@ -93,12 +92,6 @@ class NoteSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         validated_data["custom_user"] = CustomUser.objects.filter(user=user).first()
         return super(NoteSerializer, self).create(validated_data)
-
-
-class CustomRegisterSerializer(RegisterSerializer):
-    def custom_signup(self, request, user):
-        custom_user = CustomUser(user=user)
-        custom_user.save()
 
 
 class UserDetailSerializer(UserDetailsSerializer):

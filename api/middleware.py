@@ -13,19 +13,21 @@ FAILURE = "FAILURE"
 
 
 class APIMiddleware(object):
+    # def process_request(self):
+
     def process_response(self, request, response):
         if request.path.startswith("/api"):
             if response.status_code >= 400:
                 if request.path == "/api/rest-auth/registration/":
                     message = "注册出错"
-                if request.path == "/api/rest-auth/login/":
+                elif request.path == "/api/rest-auth/login/":
                     message = "登录出错"
                 elif request.path == "/api/note/":
                     message = "笔记出错"
                 elif request.path == "/api/sub_note/":
                     message = "子笔记出错"
                 else:
-                    print(request.path)
+                    return response
 
                 data = {
                     "status": FAILURE,
