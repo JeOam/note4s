@@ -13,8 +13,6 @@ FAILURE = "FAILURE"
 
 
 class APIMiddleware(object):
-    # def process_request(self):
-
     def process_response(self, request, response):
         if request.path.startswith("/api"):
             if response.status_code >= 400:
@@ -26,6 +24,8 @@ class APIMiddleware(object):
                     message = "笔记出错"
                 elif request.path == "/api/sub_note/":
                     message = "子笔记出错"
+                elif request.path == "/api/notebook/":
+                    message = "笔记本出错"
                 else:
                     return response
 

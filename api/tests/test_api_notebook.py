@@ -14,9 +14,8 @@ from api.models import NoteBook
 def test_get_notebooks_visitor(client):
     response = client.get("/api/notebook/",
                           format='json')
-    # import pytest
-    # pytest.set_trace()
     assert response.status_code == 200
+    assert response.data["message"] == '笔记本出错'
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures('client', 'token')

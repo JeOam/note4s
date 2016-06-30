@@ -17,7 +17,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 class NotebookViewSet(viewsets.ModelViewSet):
     queryset = NoteBook.objects.all()
     serializer_class = NoteBookSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+    permission_classes = (permissions.IsAuthenticated,
                           IsOwnerOrReadOnly)
 
 class NoteSectionViewSet(viewsets.ModelViewSet):
