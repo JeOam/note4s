@@ -140,11 +140,10 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-    ),
+    )
 }
 REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'api.serializers.UserDetailSerializer',
-
 }
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'

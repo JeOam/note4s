@@ -42,7 +42,7 @@ def token(client, test_user):
                            },
                            format='json')
     client.cookies = SimpleCookie()
-    return response.data["data"]["key"]
+    return response.json()["data"]["key"]
 
 
 @pytest.fixture()

@@ -15,7 +15,7 @@ def test_get_notebooks_visitor(client):
     response = client.get("/api/notebook/",
                           format='json')
     assert response.status_code == 200
-    assert response.data["message"] == '笔记本出错'
+    assert response.json()["message"] == '笔记本出错'
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures('client', 'token')
@@ -36,8 +36,8 @@ def test_create_notebook(client, token):
                            format='json',
                            HTTP_AUTHORIZATION='Token {}'.format(token))
     assert response.status_code == 200
-    assert response.data["data"]["name"] == "test_notebook_name"
-    notebook = NoteBook.objects.get(pk=response.data["data"]["uuid"])
+    assert response.json()["data"]["name"] == "test_notebook_name"
+    notebook = NoteBook.objects.get(pk=response.json()["data"]["uuid"])
     assert notebook.custom_user
 
 
