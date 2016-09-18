@@ -37,7 +37,7 @@ def test_create_note(client, token):
 @pytest.mark.django_db
 @pytest.mark.usefixtures('client', 'token', "test_note")
 def test_get_note_detail(client, token, test_note):
-    response = client.get("/api/note/" + test_note.uuid_str + "/",
+    response = client.get("/api/note/" + test_note.uuid_str,
                           format='json',
                           HTTP_AUTHORIZATION='Token {}'.format(token))
     assert response.status_code == 200

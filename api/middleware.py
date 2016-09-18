@@ -13,7 +13,7 @@ class APIMiddleware(object):
             if response.status_code >= 400:
                 data = {
                     "code": 400,
-                    "message": response.data,
+                    "message": response.data if hasattr(response, 'data') else '未知错误',
                     "data": []
                 }
                 custom_response = JsonResponse(data=data, status=200)
