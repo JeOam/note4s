@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 
+"""
+    git.py
+    ~~~~~~~
+"""
 import logging
 import itertools
 from os import mkdir
 from datetime import datetime
-from django.conf import settings
 from git import Repo
 from tzlocal import get_localzone
-
-__author__ = 'JeOam'
+from note4s import settings
 
 def create_git_repo(uuid_str):
     """

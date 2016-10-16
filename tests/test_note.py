@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """
-    __init__.py
+    test_note.py
     ~~~~~~~
 """

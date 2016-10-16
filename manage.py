@@ -1,10 +1,22 @@
 #!/usr/bin/env python
-import os
-import sys
+
+from tornado.options import define, options
+from note4s.models import create_table
+
+def parse_argument():
+    define("command", help="The Command")
+    options.parse_command_line()
+
+def sync_db():
+    create_table()
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "note4s.settings")
+    parse_argument()
 
-    from django.core.management import execute_from_command_line
+    def execute(args_list):
+        args_list[0](*tuple(args_list[1:]))
 
-    execute_from_command_line(sys.argv)
+    func_to_execute = {
+        "sync_db": [sync_db],
+    }
+    execute(func_to_execute[options.command])

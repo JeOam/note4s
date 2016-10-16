@@ -3,5 +3,4 @@
 """
     __init__.py.py
     ~~~~~~~
-    * Copyright (C) 2016 GridSafe, Inc.
 """
