@@ -14,7 +14,6 @@ REDIS_DB = os.environ.get("CDN_ANALYTICS_REDIS_DB", 1)
 
 PG_URL = os.environ.get("PG_URL", "postgres+psycopg2://note4s_test:note4s_test@127.0.0.1:5432/note4s_test?sslmode=disable")
 
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,

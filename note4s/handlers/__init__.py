@@ -5,3 +5,4 @@
     ~~~~~~~
 """
 from .user import LoginHandler, RegisterHandler
+from .note import NoteHandler

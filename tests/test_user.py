@@ -15,10 +15,10 @@ class UserTestCase(BaseHTTPTestCase):
             'email': 'test@test.com',
             'password': '123456'
         }
-        result = self.post('/api/login/', body=data)
+        result = self.post('/auth/login/', body=data)
         assert isinstance(result, dict)
         assert result["code"] == 200
-        assert len(result["data"]) == 172
+        assert len(result["data"]) >= 171
 
     def test_register(self):
         data = {
@@ -26,7 +26,7 @@ class UserTestCase(BaseHTTPTestCase):
             'email': 'test@test.com',
             'password': 'admin123'
         }
-        result = self.post('/api/register/', body=data)
+        result = self.post('/auth/register/', body=data)
         assert isinstance(result, dict)
         assert result["code"] == 200
         assert result["data"]["id"]

@@ -4,11 +4,12 @@
     urls.py
     ~~~~~~~
 """
-from note4s.handlers import LoginHandler, RegisterHandler
+from note4s.handlers import LoginHandler, RegisterHandler, NoteHandler
 
 api_handlers = [
-    (r'/api/login/?', LoginHandler),
-    (r'/api/register/?', RegisterHandler)
+    (r'/auth/login/?', LoginHandler),
+    (r'/auth/register/?', RegisterHandler),
+    (r'/api/note/?', NoteHandler)
 ]
 
 handlers = api_handlers

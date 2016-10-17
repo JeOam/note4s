@@ -10,6 +10,7 @@ from note4s.models import engine, BaseModel, Session, \
     User
 from note4s.utils import create_jwt
 
+
 @pytest.fixture(scope="function")
 def database(request):
     BaseModel.metadata.drop_all(engine)
@@ -19,6 +20,7 @@ def database(request):
         BaseModel.metadata.drop_all(engine)
     request.addfinalizer(finalizer)
     return engine
+
 
 @pytest.fixture(scope="function")
 def user(database, request):
@@ -35,7 +37,9 @@ def user(database, request):
     request.addfinalizer(finalizer)
     return user
 
+
 @pytest.fixture(scope="function")
 def token(user, request):
-    token = create_jwt(user_id=user.id)
+    token = create_jwt(user_id=user.id).decode("utf-8")
+    request.cls.token = token
     return token

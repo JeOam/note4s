@@ -21,5 +21,5 @@ def create_jwt(user_id):
 
 def extract_jwt(token):
     data = jwt.decode(token, settings.JWT_SECRET, algorithms=['HS256'])
-    if data.expire <= time.time():
-        return data.id
+    if data.get("expire", 0) >= time.time():
+        return data.get("id")
