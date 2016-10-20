@@ -7,6 +7,7 @@
 from .base import BaseRequestHandler
 from note4s.models import Notebook
 
+
 class NotebookHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
         params = self.get_params()
@@ -21,7 +22,6 @@ class NotebookHandler(BaseRequestHandler):
             self.api_fail_response("Failed to create notebook.")
         else:
             self.api_success_response(notebook.to_dict())
-
 
     def get(self, *args, **kwargs):
         notebooks = self.session.query(Notebook).filter_by(user=self.current_user).all()
@@ -44,4 +44,3 @@ class NotebookHandler(BaseRequestHandler):
                 notebook["children"].append(section)
 
         self.api_success_response(result)
-

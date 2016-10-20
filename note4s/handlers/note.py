@@ -7,6 +7,7 @@
 from .base import BaseRequestHandler
 from note4s.models import Note
 
+
 class NoteHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
         params = self.get_params()

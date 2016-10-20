@@ -11,6 +11,7 @@ from tornado.testing import AsyncHTTPTestCase
 
 from note4s.app import app
 
+
 @pytest.mark.usefixtures("database")
 class BaseHTTPTestCase(AsyncHTTPTestCase):
     def get_app(self):

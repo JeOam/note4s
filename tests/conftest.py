@@ -12,6 +12,7 @@ from note4s.utils import create_jwt
 
 session = Session()
 
+
 @pytest.fixture(scope="function")
 def database(request):
     BaseModel.metadata.drop_all(engine)
@@ -20,6 +21,7 @@ def database(request):
     def finalizer():
         session.close()
         BaseModel.metadata.drop_all(engine)
+
     request.addfinalizer(finalizer)
     return engine
 
@@ -46,6 +48,7 @@ def token(user, request):
     request.cls.token = token
     return token
 
+
 @pytest.fixture(scope="function")
 def note(user, request):
     note = Note(user=user,
@@ -60,6 +63,7 @@ def note(user, request):
 
     request.addfinalizer(finalizer)
     return note
+
 
 @pytest.fixture(scope="function")
 def notebooks(user, request):

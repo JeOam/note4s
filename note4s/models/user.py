@@ -11,6 +11,7 @@ from sqlalchemy import (
 
 from .base import BaseModel
 
+
 class User(BaseModel):
     username = Column(String(64), unique=True, nullable=False)
     nickname = Column(String(64))

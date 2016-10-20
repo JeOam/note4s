@@ -12,7 +12,6 @@ from note4s.models import Session, User
 from note4s.utils import extract_jwt
 
 class BaseRequestHandler(RequestHandler):
-
     def __init__(self, *args, **kwargs):
         self.session = Session()
         super().__init__(*args, **kwargs)
@@ -26,8 +25,6 @@ class BaseRequestHandler(RequestHandler):
                     user = self.session.query(User).filter_by(id=user_id).one()
                 except (exc.NoResultFound, exc.MultipleResultsFound) as e:
                     logging.error('No user with id {}'.format(user_id))
-                    import pytest
-                    pytest.set_trace()
                 else:
                     return user
 

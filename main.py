@@ -4,8 +4,6 @@
     main.py
     ~~~~~~~
 """
-
-import tornado.ioloop
 import tornado.web
 
 from note4s.app import app

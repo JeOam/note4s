@@ -14,6 +14,7 @@ from sqlalchemy.orm import relationship, backref
 from .base import BaseModel
 from .user import User
 
+
 class Notebook(BaseModel):
     name = Column(String(64))
     parent_id = Column(String(32))

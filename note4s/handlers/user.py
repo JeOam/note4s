@@ -10,6 +10,7 @@ from note4s.models import User
 from note4s.utils import create_jwt
 from .base import BaseRequestHandler
 
+
 class LoginHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
         params = self.get_params()

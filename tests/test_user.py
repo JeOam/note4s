@@ -7,8 +7,8 @@
 import pytest
 from .base import BaseHTTPTestCase
 
-class UserTestCase(BaseHTTPTestCase):
 
+class UserTestCase(BaseHTTPTestCase):
     @pytest.mark.usefixtures("user")
     def test_login(self):
         data = {

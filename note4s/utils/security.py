@@ -9,6 +9,7 @@ import datetime
 import time
 from note4s import settings
 
+
 def create_jwt(user_id):
     return jwt.encode(
         {
@@ -18,6 +19,7 @@ def create_jwt(user_id):
         settings.JWT_SECRET,
         algorithm='HS256'
     )
+
 
 def extract_jwt(token):
     data = jwt.decode(token, settings.JWT_SECRET, algorithms=['HS256'])

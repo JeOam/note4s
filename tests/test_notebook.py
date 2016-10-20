@@ -7,9 +7,9 @@
 import pytest
 from .base import BaseHTTPTestCase
 
+
 @pytest.mark.usefixtures("token")
 class NotebookTestCase(BaseHTTPTestCase):
-
     def test_create_notebook_without_token(self):
         data = {
             'name': 'test name',

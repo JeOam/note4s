@@ -21,6 +21,7 @@ from note4s.utils import underscore_naming
 engine = create_engine(settings.PG_URL, pool_recycle=3600, pool_size=20)
 Session = sessionmaker(bind=engine)
 
+
 class Base:
     @declared_attr
     def __tablename__(cls):
@@ -42,5 +43,6 @@ class Base:
             else:
                 result[column.name] = getattr(self, column.name)
         return result
+
 
 BaseModel = declarative_base(cls=Base)
