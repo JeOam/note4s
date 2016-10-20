@@ -28,3 +28,17 @@ class NoteTestCase(BaseHTTPTestCase):
         assert isinstance(result, dict)
         assert result["code"] == 200
         assert len(result["data"]["id"]) == 32
+
+    def test_note_detail_url(self):
+        result = self.get('/api/note/123')
+        assert result == '<html><title>404: Not Found</title><body>404: Not Found</body></html>'
+
+        result = self.get('/api/note/123456789012345678901234567890123')
+        assert result == '<html><title>404: Not Found</title><body>404: Not Found</body></html>'
+
+    @pytest.mark.usefixtures("note")
+    def test_note_detail(self):
+        result = self.get('/api/note/{}'.format(self.note.id))
+        assert isinstance(result, dict)
+        assert result["code"] == 200
+        assert len(result["data"]["id"]) == 32

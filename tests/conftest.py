@@ -62,6 +62,7 @@ def note(user, request):
         session.commit()
 
     request.addfinalizer(finalizer)
+    request.cls.note = note
     return note
 
 
