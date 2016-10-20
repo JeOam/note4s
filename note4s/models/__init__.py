@@ -13,4 +13,4 @@ from .notebook import Notebook
 # Create all the tables in the database which are
 # defined by Base's subclasses such as User
 def create_table():
-    BaseModel.metadata.create_all()
+    BaseModel.metadata.create_all(engine)

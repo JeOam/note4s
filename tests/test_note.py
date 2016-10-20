@@ -27,3 +27,4 @@ class NoteTestCase(BaseHTTPTestCase):
         result = self.post('/api/note/', body=data, headers={'Authorization': self.token})
         assert isinstance(result, dict)
         assert result["code"] == 200
+        assert len(result["data"]["id"]) == 32

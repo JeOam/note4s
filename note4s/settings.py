@@ -12,7 +12,7 @@ REDIS_HOST = os.environ.get("CDN_ANALYTICS_REDIS_HOST", "127.0.0.1")
 REDIS_PORT = os.environ.get("CDN_ANALYTICS_REDIS_PORT", 6379)
 REDIS_DB = os.environ.get("CDN_ANALYTICS_REDIS_DB", 1)
 
-PG_URL = os.environ.get("PG_URL", "postgres+psycopg2://note4s_test:note4s_test@127.0.0.1:5432/note4s_test?sslmode=disable")
+PG_URL = os.environ.get("PG_URL", "postgres+psycopg2://note4s:note4s@127.0.0.1:5432/note4s?sslmode=disable")
 
 LOGGING = {
     'version': 1,

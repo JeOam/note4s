@@ -6,3 +6,4 @@
 """
 from .user import LoginHandler, RegisterHandler
 from .note import NoteHandler
+from .notebook import NotebookHandler

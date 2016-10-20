@@ -26,7 +26,7 @@ class Base:
     def __tablename__(cls):
         return underscore_naming(cls.__name__)
 
-    id = Column(String(36), default=lambda: uuid.uuid4().hex, primary_key=True, index=True)
+    id = Column(String(32), default=lambda: uuid.uuid4().hex, primary_key=True, index=True)
     created = Column(DateTime, default=datetime.now)
     updated = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 

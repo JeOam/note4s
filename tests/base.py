@@ -18,14 +18,17 @@ class BaseHTTPTestCase(AsyncHTTPTestCase):
         return self.app
 
     def get(self, url, **kwargs):
-        return self.fetch(url, headers={}, **kwargs)
+        result = self.fetch(url, method="GET", **kwargs)
+        return self.prepare_result(result)
 
     def post(self, url, **kwargs):
         if 'body' in kwargs and isinstance(kwargs['body'], dict):
             kwargs['body'] = json.dumps(kwargs['body'])
 
         result = self.fetch(url, method="POST", **kwargs)
+        return self.prepare_result(result)
 
+    def prepare_result(self, result):
         try:
             data = json.loads(result.body.decode('utf-8'))
         except:
