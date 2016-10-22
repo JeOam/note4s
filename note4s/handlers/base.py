@@ -11,6 +11,7 @@ from sqlalchemy import exc
 from note4s.models import Session, User
 from note4s.utils import extract_jwt
 
+
 class BaseRequestHandler(RequestHandler):
     def __init__(self, *args, **kwargs):
         self.session = Session()
@@ -23,15 +24,15 @@ class BaseRequestHandler(RequestHandler):
             if user_id:
                 try:
                     user = self.session.query(User).filter_by(id=user_id).one()
-                except (exc.NoResultFound, exc.MultipleResultsFound) as e:
+                except exc.NoResultFound:
                     logging.error('No user with id {}'.format(user_id))
                 else:
                     return user
 
     def prepare(self):
-        if self.request.method == 'POST' and self.request.path.startswith("/api/"):
+        if self.request.path.startswith("/api/"):
             if not self.current_user:
-                self.api_fail_response("Authorization Required.")
+                self.api_fail_response("Authorization Required.", 401)
 
     def get_params(self):
         try:
@@ -42,24 +43,33 @@ class BaseRequestHandler(RequestHandler):
         else:
             return params
 
-    def api_fail_response(self, message):
+    def options(self, *args, **kwargs):
+        self.set_header('Access-Control-Allow-Origin', 'http://localhost:8088')
+        self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.finish()
+
+    def api_fail_response(self, message, code=400):
         """
         返回失败的信息
         """
         self.write({
-            "code": 400,
+            "code": code,
             "message": message
         })
+        self.set_header('Access-Control-Allow-Origin', 'http://localhost:8088')
+        self.set_header('Content-Type', 'application/json')
         self.finish()
 
-    def api_success_response(self, data):
+    def api_success_response(self, data, code=200):
         """
         返回成功的结果
         """
         self.write(json.dumps({
-            'code': 200,
+            'code': code,
             "data": data
         }))
+        self.set_header('Access-Control-Allow-Origin', 'http://localhost:8088')
+        self.set_header('Content-Type', 'application/json')
         self.finish()
 
     def on_finish(self):
