@@ -16,8 +16,9 @@ from .user import User
 
 
 class Note(BaseModel):
-    title = Column(String(128), nullable=False)
+    title = Column(String(128))
     content = Column(String)
-    parent_id = Column(String(64))
+    parent_id = Column(String(32))
+    notebook_id = Column(String(32))
     user_id = Column(String, ForeignKey('user.id'))
     user = relationship(User, backref=backref("notes", cascade="all, delete-orphan"))

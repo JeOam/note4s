@@ -7,7 +7,6 @@
 import json
 import logging
 from tornado.web import RequestHandler
-from sqlalchemy import exc
 from note4s.models import Session, User
 from note4s.utils import extract_jwt
 
@@ -22,12 +21,11 @@ class BaseRequestHandler(RequestHandler):
         if token:
             user_id = extract_jwt(token)
             if user_id:
-                try:
-                    user = self.session.query(User).filter_by(id=user_id).one()
-                except exc.NoResultFound:
-                    logging.error('No user with id {}'.format(user_id))
-                else:
+                user = self.session.query(User).filter_by(id=user_id).one_or_none()
+                if user:
                     return user
+                else:
+                    logging.error('No user with id {}'.format(user_id))
 
     def prepare(self):
         if self.request.path.startswith("/api/"):
@@ -44,8 +42,9 @@ class BaseRequestHandler(RequestHandler):
             return params
 
     def options(self, *args, **kwargs):
-        self.set_header('Access-Control-Allow-Origin', 'http://localhost:8088')
+        self.set_header('Access-Control-Allow-Origin', 'http://127.0.0.1:8088')
         self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
         self.finish()
 
     def api_fail_response(self, message, code=400):
@@ -56,8 +55,10 @@ class BaseRequestHandler(RequestHandler):
             "code": code,
             "message": message
         })
-        self.set_header('Access-Control-Allow-Origin', 'http://localhost:8088')
+        self.set_header('Access-Control-Allow-Origin', 'http://127.0.0.1:8088,')
         self.set_header('Content-Type', 'application/json')
+        self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
         self.finish()
 
     def api_success_response(self, data, code=200):
@@ -68,8 +69,10 @@ class BaseRequestHandler(RequestHandler):
             'code': code,
             "data": data
         }))
-        self.set_header('Access-Control-Allow-Origin', 'http://localhost:8088')
+        self.set_header('Access-Control-Allow-Origin', 'http://127.0.0.1:8088')
         self.set_header('Content-Type', 'application/json')
+        self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
         self.finish()
 
     def on_finish(self):
