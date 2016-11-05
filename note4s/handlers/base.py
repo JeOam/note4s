@@ -42,7 +42,7 @@ class BaseRequestHandler(RequestHandler):
             return params
 
     def options(self, *args, **kwargs):
-        self.set_header('Access-Control-Allow-Origin', 'http://127.0.0.1:8088')
+        self.set_header('Access-Control-Allow-Origin', '*')
         self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
         self.finish()
@@ -55,7 +55,7 @@ class BaseRequestHandler(RequestHandler):
             "code": code,
             "message": message
         })
-        self.set_header('Access-Control-Allow-Origin', 'http://127.0.0.1:8088,')
+        self.set_header('Access-Control-Allow-Origin', '*')
         self.set_header('Content-Type', 'application/json')
         self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
@@ -69,7 +69,7 @@ class BaseRequestHandler(RequestHandler):
             'code': code,
             "data": data
         }))
-        self.set_header('Access-Control-Allow-Origin', 'http://127.0.0.1:8088')
+        self.set_header('Access-Control-Allow-Origin', '*')
         self.set_header('Content-Type', 'application/json')
         self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
