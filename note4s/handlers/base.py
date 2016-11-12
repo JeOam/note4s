@@ -28,9 +28,14 @@ class BaseRequestHandler(RequestHandler):
                     logging.error('No user with id {}'.format(user_id))
 
     def prepare(self):
+        self.set_header('Access-Control-Allow-Origin', '*')
+        self.set_header('Content-Type', 'application/json')
+        self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
         if self.request.path.startswith("/api/"):
             if not self.current_user:
                 self.api_fail_response("Authorization Required.", 401)
+
 
     def get_params(self):
         try:
@@ -41,11 +46,13 @@ class BaseRequestHandler(RequestHandler):
         else:
             return params
 
-    def options(self, *args, **kwargs):
-        self.set_header('Access-Control-Allow-Origin', '*')
-        self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-        self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-        self.finish()
+    def update_modal(self, modal, keys):
+        params = self.get_params()
+        for column in modal.__table__.columns:
+            if column.name in keys:
+                data = params.get(column.name, getattr(modal, column.name))
+                setattr(modal, column.name, data)
+
 
     def api_fail_response(self, message, code=400):
         """
@@ -55,10 +62,6 @@ class BaseRequestHandler(RequestHandler):
             "code": code,
             "message": message
         })
-        self.set_header('Access-Control-Allow-Origin', '*')
-        self.set_header('Content-Type', 'application/json')
-        self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-        self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
         self.finish()
 
     def api_success_response(self, data, code=200):
@@ -69,10 +72,6 @@ class BaseRequestHandler(RequestHandler):
             'code': code,
             "data": data
         }))
-        self.set_header('Access-Control-Allow-Origin', '*')
-        self.set_header('Content-Type', 'application/json')
-        self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-        self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
         self.finish()
 
     def on_finish(self):

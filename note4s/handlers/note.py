@@ -68,3 +68,25 @@ class NoteDetailHandler(BaseRequestHandler):
 
             result["subnotes"] = subnotes
             self.api_success_response(result)
+
+    def put(self, note_id):
+        note = self.session.query(Note).filter_by(user=self.current_user, id=note_id).first()
+        if note:
+            if note.parent_id:
+                keys = set(['content'])
+            else:
+                keys = set(['title', 'content'])
+            self.update_modal(note, keys)
+            self.session.commit()
+            self.api_success_response(note.to_dict())
+        else:
+            self.api_fail_response("Note {} does not exist.".format(note_id))
+
+    def delete(self, note_id):
+        note = self.session.query(Note).filter_by(user=self.current_user, id=note_id).first()
+        if note:
+            self.session.delete(note)
+            self.session.commit()
+            self.api_success_response(True)
+        else:
+            self.api_fail_response("Note {} does not exist.".format(note_id))
