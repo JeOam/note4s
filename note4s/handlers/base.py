@@ -36,6 +36,8 @@ class BaseRequestHandler(RequestHandler):
             if not self.current_user:
                 self.api_fail_response("Authorization Required.", 401)
 
+    def options(self, *args, **kwargs):
+        self.finish()
 
     def get_params(self):
         try:
@@ -52,7 +54,6 @@ class BaseRequestHandler(RequestHandler):
             if column.name in keys:
                 data = params.get(column.name, getattr(modal, column.name))
                 setattr(modal, column.name, data)
-
 
     def api_fail_response(self, message, code=400):
         """

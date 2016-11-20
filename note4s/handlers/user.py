@@ -16,7 +16,6 @@ class LoginHandler(BaseRequestHandler):
         params = self.get_params()
         email = params.get("email", None)
         password = params.get("password", None)
-
         if (not email) or (not password):
             self.api_fail_response("Not Enough Fields")
             return

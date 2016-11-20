@@ -27,3 +27,9 @@ $ python manage.py --command=sync_db
 # 单元测试
 $ py.test -s # -s to show verbose message
 ```
+
+表格迁移：
+```
+alembic revision --autogenerate -m "change log"
+alembic upgrade head
+```

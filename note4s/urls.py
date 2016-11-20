@@ -10,7 +10,7 @@ from note4s.handlers import LoginHandler, RegisterHandler, \
     NotebookHandler
 
 api_handlers = [
-    (r'/auth/login/?', LoginHandler),
+    (r'/auth/login/', LoginHandler),
     (r'/auth/register/?', RegisterHandler),
     (r'/auth/checkusername/', CheckHandler),
     (r'/api/profile/', ProfileHandler),

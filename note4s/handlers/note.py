@@ -4,7 +4,6 @@
     note.py
     ~~~~~~~
 """
-from sqlalchemy.orm import exc
 from sqlalchemy import or_, asc
 from .base import BaseRequestHandler
 from note4s.models import Note, Notebook
@@ -15,17 +14,19 @@ class NoteHandler(BaseRequestHandler):
         params = self.get_params()
         title = params.get("title")
         content = params.get("content")
+        section_id = params.get('section_id')
         notebook_id = params.get('notebook_id')
         note = Note(user=self.current_user,
                     title=title,
                     content=content,
+                    section_id=section_id,
                     notebook_id=notebook_id)
         self.session.add(note)
         self.session.commit()
         notebook = Notebook(name=title,
                             note_id=note.id,
                             user=self.current_user,
-                            parent_id=notebook_id)
+                            parent_id=section_id)
         self.session.add(notebook)
         self.session.commit()
         self.api_success_response(note.to_dict())
@@ -65,7 +66,18 @@ class NoteDetailHandler(BaseRequestHandler):
                     result = note.to_dict()
                 else:
                     subnotes.append(note.to_dict())
-
+            if result.get('id') is None:
+                self.api_fail_response("Note {} does not exist.".format(note_id))
+                return
+            notebooks = self.session.query(Notebook). \
+                filter(or_(Notebook.id == result.get('notebook_id'),
+                           Notebook.id == result.get('section_id'))). \
+                all()
+            for notebook in notebooks:
+                if notebook.id == result.get('notebook_id'):
+                    result["notebook"] = notebook.to_dict()
+                elif notebook.id == result.get('section_id'):
+                    result["section"] = notebook.to_dict()
             result["subnotes"] = subnotes
             self.api_success_response(result)
 
@@ -83,6 +95,9 @@ class NoteDetailHandler(BaseRequestHandler):
             self.api_fail_response("Note {} does not exist.".format(note_id))
 
     def delete(self, note_id):
+        notebook = self.session.query(Notebook).filter_by(note_id=note_id).first()
+        if notebook:
+            self.session.delete(notebook)
         note = self.session.query(Note).filter_by(user=self.current_user, id=note_id).first()
         if note:
             self.session.delete(note)
