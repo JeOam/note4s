@@ -71,13 +71,20 @@ class NoteDetailHandler(BaseRequestHandler):
                 return
             notebooks = self.session.query(Notebook). \
                 filter(or_(Notebook.id == result.get('notebook_id'),
-                           Notebook.id == result.get('section_id'))). \
+                           Notebook.id == result.get('section_id'),
+                           Notebook.parent_id == result.get('notebook_id'))). \
                 all()
+
+            children = []
             for notebook in notebooks:
                 if notebook.id == result.get('notebook_id'):
                     result["notebook"] = notebook.to_dict()
                 elif notebook.id == result.get('section_id'):
                     result["section"] = notebook.to_dict()
+                if notebook.parent_id == result.get('notebook_id'):
+                    children.append(notebook.to_dict())
+            if result.get('notebook'):
+                result["notebook"]["children"] = children
             result["subnotes"] = subnotes
             self.api_success_response(result)
 
@@ -87,7 +94,16 @@ class NoteDetailHandler(BaseRequestHandler):
             if note.parent_id:
                 keys = set(['content'])
             else:
-                keys = set(['title', 'content'])
+                keys = set(['title', 'content', 'notebook_id', 'section_id'])
+
+            params = self.get_params()
+            if params.get('section_id') and note.section_id != params.get('section_id'):
+                notebook = self.session.query(Notebook).filter_by(note_id=note.id).first()
+                if notebook:
+                    notebook.parent_id = params.get('section_id')
+                    self.session.add(notebook)
+                    self.session.commit()
+
             self.update_modal(note, keys)
             self.session.commit()
             self.api_success_response(note.to_dict())
