@@ -91,6 +91,9 @@ def notebooks(user, request):
                              name=note.title,
                              note_id=note.id,
                              parent_id=note_section1.id)
+    note.notebook_id = notebook1.id
+    note.section_id = note_section1.id
+    session.add(note)
     session.add(notebook_note)
     session.commit()
 

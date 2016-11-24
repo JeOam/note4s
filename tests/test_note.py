@@ -17,7 +17,7 @@ class NoteTestCase(BaseHTTPTestCase):
         }
         result = self.post('/api/note/', body=data)
         assert isinstance(result, dict)
-        assert result["code"] == 400
+        assert result["code"] == 401
 
     def test_create_note(self):
         data = {
@@ -38,7 +38,7 @@ class NoteTestCase(BaseHTTPTestCase):
 
     @pytest.mark.usefixtures("note")
     def test_note_detail(self):
-        result = self.get('/api/note/{}'.format(self.note.id))
+        result = self.get('/api/note/{}'.format(self.note.id), headers={'Authorization': self.token})
         assert isinstance(result, dict)
         assert result["code"] == 200
         assert len(result["data"]["id"]) == 32

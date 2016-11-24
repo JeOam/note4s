@@ -16,7 +16,7 @@ class NotebookTestCase(BaseHTTPTestCase):
         }
         result = self.post('/api/notebook/', body=data)
         assert isinstance(result, dict)
-        assert result["code"] == 400
+        assert result["code"] == 401
 
     def test_create_notebook(self):
         data = {
