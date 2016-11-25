@@ -25,7 +25,7 @@ class BaseRequestHandler(RequestHandler):
                 if user:
                     return user
                 else:
-                    logging.error('No user with id {}'.format(user_id))
+                    logging.error(f'No user with id {user_id}')
 
     def prepare(self):
         self.set_header('Access-Control-Allow-Origin', '*')

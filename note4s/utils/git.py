@@ -22,11 +22,9 @@ def create_git_repo(uuid_str):
     try:
         mkdir(git_path)
     except FileExistsError:
-        logging.warning("create git repo {} failed: already exist".format(
-            git_path
-        ))
+        logging.warning(f'create git repo {git_path} failed: already exist')
     else:
-        logging.info("create git repo at: {}".format(git_path))
+        logging.info(f'create git repo at: {git_path}')
         Repo.init(git_path)
 
 

@@ -52,7 +52,7 @@ class NotebookHandler(BaseRequestHandler):
         try:
             notebook = self.session.query(Notebook).filter_by(id=notebook_id).one()
         except exc.NoResultFound as e:
-            self.api_fail_response("Notebook {} does not exist.".format(notebook_id))
+            self.api_fail_response(f'Notebook {notebook_id} does not exist.')
         else:
             self.session.delete(notebook)
             self.session.commit()

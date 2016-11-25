@@ -44,7 +44,7 @@ class SubNoteHandler(BaseRequestHandler):
         try:
             self.session.commit()
         except Exception as e:
-            self.api_fail_response("Faied to create sub note: {}".format(e))
+            self.api_fail_response(f'Faied to create sub note: {e}')
         else:
             self.api_success_response(note.to_dict())
 
@@ -57,7 +57,7 @@ class NoteDetailHandler(BaseRequestHandler):
             order_by(asc(Note.created)).\
             all()
         if len(notes) == 0:
-            self.api_fail_response("Note {} does not exist.".format(note_id))
+            self.api_fail_response(f'Note {note_id} does not exist.')
         else:
             result = {}
             subnotes = []
@@ -67,7 +67,7 @@ class NoteDetailHandler(BaseRequestHandler):
                 else:
                     subnotes.append(note.to_dict())
             if result.get('id') is None:
-                self.api_fail_response("Note {} does not exist.".format(note_id))
+                self.api_fail_response(f'Note {note_id} does not exist.')
                 return
             notebooks = self.session.query(Notebook). \
                 filter(or_(Notebook.id == result.get('notebook_id'),
@@ -108,7 +108,7 @@ class NoteDetailHandler(BaseRequestHandler):
             self.session.commit()
             self.api_success_response(note.to_dict())
         else:
-            self.api_fail_response("Note {} does not exist.".format(note_id))
+            self.api_fail_response(f'Note {note_id} does not exist.')
 
     def delete(self, note_id):
         notebook = self.session.query(Notebook).filter_by(note_id=note_id).first()
@@ -120,4 +120,4 @@ class NoteDetailHandler(BaseRequestHandler):
             self.session.commit()
             self.api_success_response(True)
         else:
-            self.api_fail_response("Note {} does not exist.".format(note_id))
+            self.api_fail_response(f'Note {note_id} does not exist.')
