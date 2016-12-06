@@ -44,7 +44,7 @@ def user(database, request):
 
 @pytest.fixture(scope="function")
 def token(user, request):
-    token = create_jwt(user_id=user.id).decode("utf-8")
+    token = create_jwt(user_id=user.id.hex).decode("utf-8")
     request.cls.token = token
     return token
 

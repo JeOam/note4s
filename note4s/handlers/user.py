@@ -25,7 +25,7 @@ class LoginHandler(BaseRequestHandler):
             self.api_fail_response('Login Failed. Please check you account and password.')
             return
         else:
-            self.api_success_response(create_jwt(user.id).decode("utf-8"))
+            self.api_success_response(create_jwt(user.id.hex).decode("utf-8"))
 
 
 class RegisterHandler(BaseRequestHandler):

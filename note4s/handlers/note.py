@@ -8,7 +8,6 @@ from sqlalchemy import or_, asc
 from .base import BaseRequestHandler
 from note4s.models import Note, Notebook
 
-
 class NoteHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
         params = self.get_params()
@@ -62,7 +61,7 @@ class NoteDetailHandler(BaseRequestHandler):
             result = {}
             subnotes = []
             for note in notes:
-                if note.id == note_id:
+                if note.id.hex == note_id:
                     result = note.to_dict()
                 else:
                     subnotes.append(note.to_dict())

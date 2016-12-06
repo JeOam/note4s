@@ -12,6 +12,7 @@ from sqlalchemy import (
     DateTime,
     String
 )
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 
 from sqlalchemy.orm import sessionmaker
@@ -27,7 +28,7 @@ class Base:
     def __tablename__(cls):
         return underscore_naming(cls.__name__)
 
-    id = Column(String(32), default=lambda: uuid.uuid4().hex, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True, index=True)
     created = Column(DateTime, default=datetime.now)
     updated = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
@@ -37,9 +38,10 @@ class Base:
         for column in self.__table__.columns:
             if column.name in exclude:
                 continue
-
             if isinstance(getattr(self, column.name), datetime):
                 result[column.name] = str(getattr(self, column.name))
+            elif isinstance(getattr(self, column.name), uuid.UUID):
+                result[column.name] = getattr(self, column.name).hex
             else:
                 result[column.name] = getattr(self, column.name)
         return result

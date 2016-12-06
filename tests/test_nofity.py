@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-    test_note.py
+    test_nofity.py
     ~~~~~~~
 """
 import pytest

@@ -33,3 +33,13 @@ $ py.test -s # -s to show verbose message
 alembic revision --autogenerate -m "change log"
 alembic upgrade head
 ```
+
+Timeline 系统：
+个人 timeline
+团队 timeline
+关注的人 timeline
+缓存与分页
+
+通知系统：
+个人通知
+团队通知

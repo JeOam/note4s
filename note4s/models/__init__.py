@@ -9,6 +9,12 @@ from .base import engine, Session, BaseModel
 from .user import User
 from .note import Note
 from .notebook import Notebook
+from .notification import (
+    Notification,
+    TYPE as N_TYPE,
+    TARGET_TYPE as N_TARGET_TYPE,
+    UserNotification
+)
 
 
 # Create all the tables in the database which are

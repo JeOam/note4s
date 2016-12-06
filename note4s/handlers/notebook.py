@@ -16,10 +16,10 @@ class NotebookHandler(BaseRequestHandler):
         result = []
         for notebook in notebooks:
             if notebook.parent_id:
-                if temp.get(notebook.parent_id):
-                    temp[notebook.parent_id].append(notebook.to_dict())
+                if temp.get(notebook.parent_id.hex):
+                    temp[notebook.parent_id.hex].append(notebook.to_dict())
                 else:
-                    temp[notebook.parent_id] = [notebook.to_dict()]
+                    temp[notebook.parent_id.hex] = [notebook.to_dict()]
             else:
                 result.append(notebook.to_dict())
         for notebook in result:
@@ -29,7 +29,6 @@ class NotebookHandler(BaseRequestHandler):
                 notes = temp.get(section["id"], [])
                 section["children"] = notes
                 notebook["children"].append(section)
-
         self.api_success_response(result)
 
     def post(self, *args, **kwargs):
