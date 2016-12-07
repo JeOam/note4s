@@ -8,10 +8,9 @@
 from sqlalchemy import (
     Column,
     String,
-    Integer,
     Boolean
 )
-from sqlalchemy.dialects.postgresql import ENUM
+from sqlalchemy.dialects.postgresql import ENUM, UUID
 from .base import BaseModel
 
 ACTION = ('new note', 'new subnote', 'comment', 'star', 'follow', 'at')
@@ -26,30 +25,32 @@ TYPE_ENUM = ENUM(*TYPE, name='type')
 class Notification(BaseModel):
     content = Column(String, nullable=False)
     type = Column(TYPE_ENUM)
-    target_id = Column(String(32))
+    target_id = Column(UUID(as_uuid=True))
     target_type = Column(TARGET_TYPE_ENUM)
     action = Column(ACTION_ENUM)
-    sender_id = Column(String(32))
+    sender_id = Column(UUID(as_uuid=True))
 
 
 class UserNotification(BaseModel):
     is_read = Column(Boolean, default=False)
-    user_id = Column(String(32))
-    notification_id = Column(String(32))
+    user_id = Column(UUID(as_uuid=True))
+    notification_id = Column(UUID(as_uuid=True))
 
 
 class Subscription(BaseModel):
-    target_id = Column(String(32))
+    target_id = Column(UUID(as_uuid=True))
     target_type = Column(TARGET_TYPE_ENUM)
     action = Column(ACTION_ENUM)
-    user_id = Column(String(32))
+    user_id = Column(UUID(as_uuid=True))
 
 
 class Watch(BaseModel):
-    target_id = Column(String(32))
-    user_id = Column(String(32))
+    target_id = Column(UUID(as_uuid=True))
+    target_type = Column(TARGET_TYPE_ENUM)
+    user_id = Column(UUID(as_uuid=True))
 
 
 class Star(BaseModel):
-    target_id = Column(String(32))
-    user_id = Column(String(32))
+    target_id = Column(UUID(as_uuid=True))
+    target_type = Column(TARGET_TYPE_ENUM)
+    user_id = Column(UUID(as_uuid=True))

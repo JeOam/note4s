@@ -6,7 +6,8 @@
 """
 from sqlalchemy import or_, asc
 from .base import BaseRequestHandler
-from note4s.models import Note, Notebook
+from note4s.models import Note, Notebook, Watch, Star, N_TARGET_TYPE
+
 
 class NoteHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
@@ -20,12 +21,11 @@ class NoteHandler(BaseRequestHandler):
                     content=content,
                     section_id=section_id,
                     notebook_id=notebook_id)
-        self.session.add(note)
-        self.session.commit()
         notebook = Notebook(name=title,
                             note_id=note.id,
                             user=self.current_user,
                             parent_id=section_id)
+        self.session.add(note)
         self.session.add(notebook)
         self.session.commit()
         self.api_success_response(note.to_dict())
@@ -50,10 +50,10 @@ class SubNoteHandler(BaseRequestHandler):
 
 class NoteDetailHandler(BaseRequestHandler):
     def get(self, note_id):
-        notes = self.session.query(Note).\
+        notes = self.session.query(Note). \
             filter(or_(Note.id == note_id,
                        Note.parent_id == note_id)). \
-            order_by(asc(Note.created)).\
+            order_by(asc(Note.created)). \
             all()
         if len(notes) == 0:
             self.api_fail_response(f'Note {note_id} does not exist.')
@@ -101,7 +101,6 @@ class NoteDetailHandler(BaseRequestHandler):
                 if notebook:
                     notebook.parent_id = params.get('section_id')
                     self.session.add(notebook)
-                    self.session.commit()
 
             self.update_modal(note, keys)
             self.session.commit()
@@ -120,3 +119,78 @@ class NoteDetailHandler(BaseRequestHandler):
             self.api_success_response(True)
         else:
             self.api_fail_response(f'Note {note_id} does not exist.')
+
+
+class WatchNoteHandler(BaseRequestHandler):
+    def post(self, note_id):
+        note = self.session.query(Note).filter(Note.id == note_id).first()
+        if not note:
+            self.api_fail_response(f'Note {note_id} does not exist.')
+            return
+
+        watch = self.session.query(Watch).filter_by(
+            target_id=note_id,
+            target_type=N_TARGET_TYPE[1],
+            user_id=self.current_user.id
+        ).first()
+        if watch:
+            self.api_success_response(True)
+            return
+
+        watch = Watch(target_id=note_id,
+                      target_type=N_TARGET_TYPE[1],
+                      user_id=self.current_user.id)
+        self.session.add(watch)
+        self.session.commit()
+        self.api_success_response(True)
+
+    def delete(self, note_id):
+        note = self.session.query(Note).filter(Note.id == note_id).first()
+        if not note:
+            self.api_fail_response(f'Note {note_id} does not exist.')
+            return
+        watch = self.session.query(Watch).filter_by(
+            target_id=note_id,
+            target_type=N_TARGET_TYPE[1],
+            user_id=self.current_user.id
+        ).first()
+        self.session.delete(watch)
+        self.session.commit()
+        self.api_success_response(True)
+
+
+class StarNoteHandler(BaseRequestHandler):
+    def post(self, note_id):
+        note = self.session.query(Note).filter(Note.id == note_id).first()
+        if not note:
+            self.api_fail_response(f'Note {note_id} does not exist.')
+            return
+        star = self.session.query(Star).filter_by(
+            target_id=note_id,
+            target_type=N_TARGET_TYPE[1],
+            user_id=self.current_user.id
+        ).first()
+        if star:
+            self.api_success_response(True)
+            return
+
+        star = Star(target_id=note_id,
+                    target_type=N_TARGET_TYPE[1],
+                    user_id=self.current_user.id)
+        self.session.add(star)
+        self.session.commit()
+        self.api_success_response(True)
+
+    def delete(self, note_id):
+        note = self.session.query(Note).filter(Note.id == note_id).first()
+        if not note:
+            self.api_fail_response(f'Note {note_id} does not exist.')
+            return
+        star = self.session.query(Star).filter_by(
+            target_id=note_id,
+            target_type=N_TARGET_TYPE[1],
+            user_id=self.current_user.id
+        ).first()
+        self.session.delete(star)
+        self.session.commit()
+        self.api_success_response(True)

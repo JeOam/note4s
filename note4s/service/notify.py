@@ -4,7 +4,6 @@
     notify.py
     ~~~~~~~
     创建消息，放进队列，入库，生成缓存
-
     1. 评论了你的 Note
     2. 回复了你的评论
     3. @ 你 了
@@ -16,6 +15,9 @@ from note4s.models import (
     Notification, N_TYPE,
     UserNotification
 )
+
+def notify_note_comment():
+    pass
 
 
 def create_remind(target_id, target_type, action, sender_id, session):
@@ -41,10 +43,9 @@ def create_message(content, target_id, sender_id, session):
                                 target_id=target_id,
                                 sender_id=sender_id,
                                 type=N_TYPE[2])
-    session.add(notification)
-    session.commit()
     user_noficiation = UserNotification(user_id=target_id,
                                         notification_id=notification.id)
+    session.add(notification)
     session.add(user_noficiation)
     session.commit()
 
@@ -53,5 +54,4 @@ def pull_notifications(user_id):
 
 
 def read(user_id, notification_id):
-
     pass

@@ -7,6 +7,7 @@
 from note4s.handlers import LoginHandler, RegisterHandler, \
     CheckHandler, ProfileHandler, \
     NoteHandler, SubNoteHandler, NoteDetailHandler, \
+    WatchNoteHandler, StarNoteHandler, \
     NotebookHandler
 
 api_handlers = [
@@ -17,6 +18,8 @@ api_handlers = [
     (r'/api/note/', NoteHandler),
     (r'/api/subnote/', SubNoteHandler),
     (r'/api/note/(?P<note_id>[0-9a-f]{32}\Z)?', NoteDetailHandler),
+    (r'/api/note/watch/(?P<note_id>[0-9a-f]{32}\Z)?', WatchNoteHandler),
+    (r'/api/note/star/(?P<note_id>[0-9a-f]{32}\Z)?', StarNoteHandler),
     (r'/api/notebook/?', NotebookHandler),
     (r'/api/notebook/(?P<notebook_id>[0-9a-f]{32}\Z)?', NotebookHandler)
 

@@ -13,7 +13,9 @@ from .notification import (
     Notification,
     TYPE as N_TYPE,
     TARGET_TYPE as N_TARGET_TYPE,
-    UserNotification
+    UserNotification,
+    Watch,
+    Star
 )
 
 

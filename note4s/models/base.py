@@ -14,6 +14,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy.ext.declarative.base import _declarative_constructor
 
 from sqlalchemy.orm import sessionmaker
 from note4s import settings
@@ -32,6 +33,10 @@ class Base:
     created = Column(DateTime, default=datetime.now)
     updated = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
+    def __init__(self, **kwargs):
+        self.id = uuid.uuid4()
+        _declarative_constructor(self, **kwargs)
+
     def to_dict(self):
         result = {}
         exclude = set(["password", "parent_id"])
@@ -47,4 +52,4 @@ class Base:
         return result
 
 
-BaseModel = declarative_base(cls=Base)
+BaseModel = declarative_base(cls=Base, constructor=Base.__init__)

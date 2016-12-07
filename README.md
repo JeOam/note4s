@@ -3,8 +3,11 @@
 
 测试管理员帐号密码：
 
-admin
-admin123
+test@test.com
+123456
+
+test@test.cn
+123456
 
 配置:
 ```

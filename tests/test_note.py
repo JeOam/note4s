@@ -5,8 +5,9 @@
     ~~~~~~~
 """
 import pytest
+from note4s.models import Watch, Star
 from .base import BaseHTTPTestCase
-
+from .conftest import session
 
 @pytest.mark.usefixtures("token")
 class NoteTestCase(BaseHTTPTestCase):
@@ -42,3 +43,25 @@ class NoteTestCase(BaseHTTPTestCase):
         assert isinstance(result, dict)
         assert result["code"] == 200
         assert len(result["data"]["id"]) == 32
+
+    @pytest.mark.usefixtures("note", "another_user", "another_token")
+    def test_watch_note(self):
+        result = self.post(f'/api/note/watch/{self.note.id.hex}', body={}, headers={'Authorization': self.another_token})
+        assert isinstance(result, dict)
+        assert result["code"] == 200
+        assert result["data"] is True
+        watch = session.query(Watch).first()
+        assert watch
+        assert watch.target_id == self.note.id
+        assert watch.user_id == self.another_user.id
+
+    @pytest.mark.usefixtures("note", "another_user", "another_token")
+    def test_star_note(self):
+        result = self.post(f'/api/note/star/{self.note.id.hex}', body={}, headers={'Authorization': self.another_token})
+        assert isinstance(result, dict)
+        assert result["code"] == 200
+        assert result["data"] is True
+        star = session.query(Star).first()
+        assert star
+        assert star.target_id == self.note.id
+        assert star.user_id == self.another_user.id
