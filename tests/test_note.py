@@ -49,7 +49,7 @@ class NoteTestCase(BaseHTTPTestCase):
         result = self.post(f'/api/note/watch/{self.note.id.hex}', body={}, headers={'Authorization': self.another_token})
         assert isinstance(result, dict)
         assert result["code"] == 200
-        assert result["data"] is True
+        assert result["data"] == 1
         watch = session.query(Watch).first()
         assert watch
         assert watch.target_id == self.note.id
@@ -60,7 +60,7 @@ class NoteTestCase(BaseHTTPTestCase):
         result = self.post(f'/api/note/star/{self.note.id.hex}', body={}, headers={'Authorization': self.another_token})
         assert isinstance(result, dict)
         assert result["code"] == 200
-        assert result["data"] is True
+        assert result["data"] == 1
         star = session.query(Star).first()
         assert star
         assert star.target_id == self.note.id

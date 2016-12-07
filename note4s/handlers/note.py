@@ -10,45 +10,6 @@ from note4s.models import Note, Notebook, Watch, Star, N_TARGET_TYPE
 
 
 class NoteHandler(BaseRequestHandler):
-    def post(self, *args, **kwargs):
-        params = self.get_params()
-        title = params.get("title")
-        content = params.get("content")
-        section_id = params.get('section_id')
-        notebook_id = params.get('notebook_id')
-        note = Note(user=self.current_user,
-                    title=title,
-                    content=content,
-                    section_id=section_id,
-                    notebook_id=notebook_id)
-        notebook = Notebook(name=title,
-                            note_id=note.id,
-                            user=self.current_user,
-                            parent_id=section_id)
-        self.session.add(note)
-        self.session.add(notebook)
-        self.session.commit()
-        self.api_success_response(note.to_dict())
-
-
-class SubNoteHandler(BaseRequestHandler):
-    def post(self, *args, **kwargs):
-        params = self.get_params()
-        content = params.get("content")
-        parent_id = params.get('parent_id')
-        note = Note(user=self.current_user,
-                    content=content,
-                    parent_id=parent_id)
-        self.session.add(note)
-        try:
-            self.session.commit()
-        except Exception as e:
-            self.api_fail_response(f'Faied to create sub note: {e}')
-        else:
-            self.api_success_response(note.to_dict())
-
-
-class NoteDetailHandler(BaseRequestHandler):
     def get(self, note_id):
         notes = self.session.query(Note). \
             filter(or_(Note.id == note_id,
@@ -85,7 +46,52 @@ class NoteDetailHandler(BaseRequestHandler):
             if result.get('notebook'):
                 result["notebook"]["children"] = children
             result["subnotes"] = subnotes
+
+            watch_count = self.session.query(Watch).filter_by(
+                target_id=note_id,
+                target_type=N_TARGET_TYPE[1]
+            ).count()
+            is_watch = self.session.query(Watch).filter_by(
+                target_id=note_id,
+                target_type=N_TARGET_TYPE[1],
+                user_id=self.current_user.id
+            ).first()
+            star_count = self.session.query(Star).filter_by(
+                target_id=note_id,
+                target_type=N_TARGET_TYPE[1]
+            ).count()
+            is_star = self.session.query(Star).filter_by(
+                target_id=note_id,
+                target_type=N_TARGET_TYPE[1],
+                user_id=self.current_user.id
+            ).first()
+
+            result['watch_count'] = watch_count
+            result['is_watch'] = bool(is_watch)
+            result['star_count'] = star_count
+            result['is_star'] = bool(is_star)
+
             self.api_success_response(result)
+
+    def post(self, *args, **kwargs):
+        params = self.get_params()
+        title = params.get("title")
+        content = params.get("content")
+        section_id = params.get('section_id')
+        notebook_id = params.get('notebook_id')
+        note = Note(user=self.current_user,
+                    title=title,
+                    content=content,
+                    section_id=section_id,
+                    notebook_id=notebook_id)
+        notebook = Notebook(name=title,
+                            note_id=note.id,
+                            user=self.current_user,
+                            parent_id=section_id)
+        self.session.add(note)
+        self.session.add(notebook)
+        self.session.commit()
+        self.api_success_response(note.to_dict())
 
     def put(self, note_id):
         note = self.session.query(Note).filter_by(user=self.current_user, id=note_id).first()
@@ -121,6 +127,23 @@ class NoteDetailHandler(BaseRequestHandler):
             self.api_fail_response(f'Note {note_id} does not exist.')
 
 
+class SubNoteHandler(BaseRequestHandler):
+    def post(self, *args, **kwargs):
+        params = self.get_params()
+        content = params.get("content")
+        parent_id = params.get('parent_id')
+        note = Note(user=self.current_user,
+                    content=content,
+                    parent_id=parent_id)
+        self.session.add(note)
+        try:
+            self.session.commit()
+        except Exception as e:
+            self.api_fail_response(f'Faied to create sub note: {e}')
+        else:
+            self.api_success_response(note.to_dict())
+
+
 class WatchNoteHandler(BaseRequestHandler):
     def post(self, note_id):
         note = self.session.query(Note).filter(Note.id == note_id).first()
@@ -133,8 +156,12 @@ class WatchNoteHandler(BaseRequestHandler):
             target_type=N_TARGET_TYPE[1],
             user_id=self.current_user.id
         ).first()
+        watch_count = self.session.query(Watch).filter_by(
+            target_id=note_id,
+            target_type=N_TARGET_TYPE[1]
+        ).count()
         if watch:
-            self.api_success_response(True)
+            self.api_success_response(watch_count)
             return
 
         watch = Watch(target_id=note_id,
@@ -142,7 +169,7 @@ class WatchNoteHandler(BaseRequestHandler):
                       user_id=self.current_user.id)
         self.session.add(watch)
         self.session.commit()
-        self.api_success_response(True)
+        self.api_success_response(watch_count + 1)
 
     def delete(self, note_id):
         note = self.session.query(Note).filter(Note.id == note_id).first()
@@ -170,8 +197,12 @@ class StarNoteHandler(BaseRequestHandler):
             target_type=N_TARGET_TYPE[1],
             user_id=self.current_user.id
         ).first()
+        star_count = self.session.query(Star).filter_by(
+            target_id=note_id,
+            target_type=N_TARGET_TYPE[1]
+        ).count()
         if star:
-            self.api_success_response(True)
+            self.api_success_response(star_count)
             return
 
         star = Star(target_id=note_id,
@@ -179,7 +210,7 @@ class StarNoteHandler(BaseRequestHandler):
                     user_id=self.current_user.id)
         self.session.add(star)
         self.session.commit()
-        self.api_success_response(True)
+        self.api_success_response(star_count + 1)
 
     def delete(self, note_id):
         note = self.session.query(Note).filter(Note.id == note_id).first()

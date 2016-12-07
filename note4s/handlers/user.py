@@ -58,7 +58,7 @@ class CheckHandler(BaseRequestHandler):
         if len(user) == 0:
             self.api_success_response(True)
         else:
-            self.api_fail_response(False)
+            self.api_success_response(False)
 
 
 class ProfileHandler(BaseRequestHandler):
