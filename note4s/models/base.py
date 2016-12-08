@@ -9,8 +9,7 @@ from datetime import datetime
 from sqlalchemy import (
     create_engine,
     Column,
-    DateTime,
-    String
+    DateTime
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base, declared_attr

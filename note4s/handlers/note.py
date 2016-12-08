@@ -7,7 +7,7 @@
 from sqlalchemy import or_, asc
 from .base import BaseRequestHandler
 from note4s.models import Note, Notebook, Watch, Star, N_TARGET_TYPE
-
+from note4s.service.notify import notify_new_note, notify_note_star
 
 class NoteHandler(BaseRequestHandler):
     def get(self, note_id):
@@ -70,7 +70,6 @@ class NoteHandler(BaseRequestHandler):
             result['is_watch'] = bool(is_watch)
             result['star_count'] = star_count
             result['is_star'] = bool(is_star)
-
             self.api_success_response(result)
 
     def post(self, *args, **kwargs):
@@ -91,7 +90,7 @@ class NoteHandler(BaseRequestHandler):
         self.session.add(note)
         self.session.add(notebook)
         self.session.commit()
-        
+        notify_new_note(self.current_user.id, note.id, note.title, self.session)
         self.api_success_response(note.to_dict())
 
     def put(self, note_id):
@@ -211,6 +210,14 @@ class StarNoteHandler(BaseRequestHandler):
                     user_id=self.current_user.id)
         self.session.add(star)
         self.session.commit()
+        if note.user_id != self.current_user.id:
+            notify_note_star(
+                note_owner_id=note.user_id,
+                note_id=note.id,
+                note_title=note.title,
+                sender_id=self.current_user.id,
+                session=self.session
+            )
         self.api_success_response(star_count + 1)
 
     def delete(self, note_id):

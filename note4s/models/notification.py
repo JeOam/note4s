@@ -23,10 +23,10 @@ TYPE_ENUM = ENUM(*TYPE, name='type')
 # 参考：http://www.jianshu.com/p/6bf8166b291c
 
 class Notification(BaseModel):
-    content = Column(String, nullable=False)
     type = Column(TYPE_ENUM)
     target_id = Column(UUID(as_uuid=True))
     target_type = Column(TARGET_TYPE_ENUM)
+    target_desc = Column(String)
     action = Column(ACTION_ENUM)
     sender_id = Column(UUID(as_uuid=True))
 

@@ -11,6 +11,7 @@ from .note import Note
 from .notebook import Notebook
 from .notification import (
     Notification,
+    ACTION as N_ACTION,
     TYPE as N_TYPE,
     TARGET_TYPE as N_TARGET_TYPE,
     UserNotification,
