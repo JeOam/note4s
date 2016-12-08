@@ -5,8 +5,9 @@
     ~~~~~~~
 """
 import pytest
+from note4s.models import Watch
 from .base import BaseHTTPTestCase
-
+from .conftest import session
 
 class UserTestCase(BaseHTTPTestCase):
     @pytest.mark.usefixtures("user")
@@ -32,3 +33,13 @@ class UserTestCase(BaseHTTPTestCase):
         assert result["data"]["id"]
         assert result["data"]["email"] == data["email"]
         assert not result["data"].get("password")
+
+    @pytest.mark.usefixtures("user", "another_user", "another_token")
+    def test_follow_user(self):
+        result = self.post(f'/api/follow/{self.user.id.hex}', body={}, headers={'Authorization': self.another_token})
+        assert result["code"] == 200
+        assert result["data"] == 1
+        watch = session.query(Watch).first()
+        assert watch
+        assert watch.target_id == self.user.id
+        assert watch.user_id == self.another_user.id

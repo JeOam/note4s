@@ -4,7 +4,8 @@
     urls.py
     ~~~~~~~
 """
-from note4s.handlers import LoginHandler, RegisterHandler, \
+from note4s.handlers import \
+    LoginHandler, RegisterHandler, FollowHandler, \
     CheckHandler, ProfileHandler, \
     NoteHandler, SubNoteHandler, \
     WatchNoteHandler, StarNoteHandler, \
@@ -15,6 +16,7 @@ api_handlers = [
     (r'/auth/register/?', RegisterHandler),
     (r'/auth/checkusername/', CheckHandler),
     (r'/api/profile/', ProfileHandler),
+    (r'/api/follow/(?P<user_id>[0-9a-f]{32}\Z)?', FollowHandler),
     (r'/api/note/', NoteHandler),
     (r'/api/subnote/', SubNoteHandler),
     (r'/api/note/(?P<note_id>[0-9a-f]{32}\Z)?', NoteHandler),

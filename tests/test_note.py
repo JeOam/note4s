@@ -43,6 +43,15 @@ class NoteTestCase(BaseHTTPTestCase):
         assert isinstance(result, dict)
         assert result["code"] == 200
         assert len(result["data"]["id"]) == 32
+        assert result['data']['section_id']
+        assert result['data']['section']
+        assert result['data']['section']['name']
+        assert result['data']['notebook_id']
+        assert result['data']['notebook']['name']
+        assert result['data']['is_watch'] is False
+        assert result['data']['watch_count'] == 0
+        assert result['data']['is_star'] is False
+        assert result['data']['star_count'] == 0
 
     @pytest.mark.usefixtures("note", "another_user", "another_token")
     def test_watch_note(self):

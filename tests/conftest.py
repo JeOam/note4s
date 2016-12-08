@@ -39,6 +39,7 @@ def user(database, request):
         session.commit()
 
     request.addfinalizer(finalizer)
+    request.cls.user = user
     return user
 
 @pytest.fixture(scope="function")
@@ -69,12 +70,32 @@ def another_token(another_user, request):
     request.cls.another_token = token
     return token
 
+@pytest.fixture(scope="function")
+def note_section(user, request):
+    notebook = Notebook(user=user,
+                        name="test notebook")
+    note_section = Notebook(user=user,
+                            name="test note section",
+                            parent_id=notebook.id)
+    session.add(notebook)
+    session.add(note_section)
+    session.commit()
+    def finalizer():
+        session.delete(notebook)
+        session.delete(note_section)
+        session.commit()
+
+    request.addfinalizer(finalizer)
+    request.cls.note_section = note_section
+    return note_section
 
 @pytest.fixture(scope="function")
-def note(user, request):
+def note(user, note_section, request):
     note = Note(user=user,
                 title="test title",
-                content="test content")
+                content="test content",
+                section_id=note_section.id,
+                notebook_id=note_section.parent_id)
     session.add(note)
     session.commit()
 

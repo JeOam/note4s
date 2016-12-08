@@ -37,11 +37,11 @@ class NoteHandler(BaseRequestHandler):
 
             children = []
             for notebook in notebooks:
-                if notebook.id == result.get('notebook_id'):
+                if notebook.id.hex == result.get('notebook_id'):
                     result["notebook"] = notebook.to_dict()
-                elif notebook.id == result.get('section_id'):
+                elif notebook.id.hex == result.get('section_id'):
                     result["section"] = notebook.to_dict()
-                if notebook.parent_id == result.get('notebook_id'):
+                if notebook.parent_id and notebook.parent_id.hex == result.get('notebook_id'):
                     children.append(notebook.to_dict())
             if result.get('notebook'):
                 result["notebook"]["children"] = children
@@ -91,6 +91,7 @@ class NoteHandler(BaseRequestHandler):
         self.session.add(note)
         self.session.add(notebook)
         self.session.commit()
+        
         self.api_success_response(note.to_dict())
 
     def put(self, note_id):
