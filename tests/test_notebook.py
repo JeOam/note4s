@@ -8,7 +8,6 @@ import pytest
 from .base import BaseHTTPTestCase
 
 
-@pytest.mark.usefixtures("token")
 class NotebookTestCase(BaseHTTPTestCase):
     def test_create_notebook_without_token(self):
         data = {
@@ -18,6 +17,7 @@ class NotebookTestCase(BaseHTTPTestCase):
         assert isinstance(result, dict)
         assert result["code"] == 401
 
+    @pytest.mark.usefixtures("token")
     def test_create_notebook(self):
         data = {
             'name': 'test name',
@@ -27,7 +27,7 @@ class NotebookTestCase(BaseHTTPTestCase):
         assert result["code"] == 200
         assert len(result["data"]["id"]) == 32
 
-    @pytest.mark.usefixtures("notebooks")
+    @pytest.mark.usefixtures("notebooks", "token")
     def test_get_notebook(self):
         result = self.get('/api/notebook/', headers={'Authorization': self.token})
         assert isinstance(result, dict)
@@ -38,6 +38,7 @@ class NotebookTestCase(BaseHTTPTestCase):
         assert len(result["data"][0]["children"][0]["children"]) == 1
         assert len(result["data"][1]["children"][0]["children"]) == 0
 
+    @pytest.mark.usefixtures("token")
     def test_get_notebook_without_fixture(self):
         result = self.get('/api/notebook/', headers={'Authorization': self.token})
         assert isinstance(result, dict)

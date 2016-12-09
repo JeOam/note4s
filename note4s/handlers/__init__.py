@@ -7,5 +7,5 @@
 from .user import LoginHandler, RegisterHandler, \
     CheckHandler, ProfileHandler, FollowHandler
 from .note import NoteHandler, SubNoteHandler, \
-    WatchNoteHandler, StarNoteHandler
+    WatchNoteHandler, StarNoteHandler, NoteCommentHandler
 from .notebook import NotebookHandler

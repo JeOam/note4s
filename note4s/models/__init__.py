@@ -18,6 +18,7 @@ from .notification import (
     Watch,
     Star
 )
+from .comment import Comment
 
 
 # Create all the tables in the database which are

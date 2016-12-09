@@ -8,8 +8,9 @@
     2. 回复了你的评论
     3. @ 你 了
     4. 私信你了
-    5. 点赞了你的 Note
-    6. 发了站内消息
+    5. Star 了你的 Note
+    6. Watch 了你的 Note
+    7. 发了站内消息
 """
 from note4s.models import (
     Notification, N_TYPE, N_TARGET_TYPE, N_ACTION,
@@ -45,6 +46,22 @@ def notify_note_star(note_owner_id, note_id, note_title, sender_id, session):
     session.add(user_notification)
     session.commit()
 
+def notify_note_watch(note_owner_id, note_id, note_title, sender_id, session):
+    notification = Notification(
+        type=N_TYPE[0],
+        target_id=note_id,
+        target_type=N_TARGET_TYPE[1],
+        target_desc=note_title,
+        action=N_ACTION[4],
+        sender_id=sender_id,
+    )
+    user_notification = UserNotification(
+        user_id=note_owner_id,
+        notification_id=notification.id
+    )
+    session.add(notification)
+    session.add(user_notification)
+    session.commit()
 
 def notify_note_comment():
     pass

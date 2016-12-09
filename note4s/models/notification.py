@@ -13,14 +13,12 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import ENUM, UUID
 from .base import BaseModel
 
-ACTION = ('new note', 'new subnote', 'comment', 'star', 'follow', 'at')
+ACTION = ('new note', 'new subnote', 'comment', 'star', 'watch', 'at')
 TARGET_TYPE = ('user', 'note', 'subnote', 'notebook')
 TYPE = ('remind', 'announce', 'message')
 ACTION_ENUM = ENUM(*ACTION, name='action')
 TARGET_TYPE_ENUM = ENUM(*TARGET_TYPE, name='target_type')
 TYPE_ENUM = ENUM(*TYPE, name='type')
-
-# 参考：http://www.jianshu.com/p/6bf8166b291c
 
 class Notification(BaseModel):
     type = Column(TYPE_ENUM)

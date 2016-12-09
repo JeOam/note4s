@@ -33,6 +33,9 @@ class BaseHTTPTestCase(AsyncHTTPTestCase):
         try:
             data = json.loads(result.body.decode('utf-8'))
         except:
-            return result.body.decode("utf-8")
+            if result.body:
+                return result.body.decode("utf-8")
+            else:
+                return result.body
         else:
             return data

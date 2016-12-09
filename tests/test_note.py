@@ -9,7 +9,6 @@ from note4s.models import Watch, Star
 from .base import BaseHTTPTestCase
 from .conftest import session
 
-@pytest.mark.usefixtures("token")
 class NoteTestCase(BaseHTTPTestCase):
     def test_create_note_without_token(self):
         data = {
@@ -20,6 +19,7 @@ class NoteTestCase(BaseHTTPTestCase):
         assert isinstance(result, dict)
         assert result["code"] == 401
 
+    @pytest.mark.usefixtures("token")
     def test_create_note(self):
         data = {
             'title': 'test title',
@@ -37,7 +37,7 @@ class NoteTestCase(BaseHTTPTestCase):
         result = self.get('/api/note/123456789012345678901234567890123')
         assert result == '<html><title>404: Not Found</title><body>404: Not Found</body></html>'
 
-    @pytest.mark.usefixtures("note")
+    @pytest.mark.usefixtures("note", "token")
     def test_note_detail(self):
         result = self.get(f'/api/note/{self.note.id.hex}', headers={'Authorization': self.token})
         assert isinstance(result, dict)
