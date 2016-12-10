@@ -14,7 +14,7 @@ from sqlalchemy.dialects.postgresql import ENUM, UUID
 from .base import BaseModel
 
 ACTION = ('new note', 'new subnote', 'comment', 'star', 'watch', 'at')
-TARGET_TYPE = ('user', 'note', 'subnote', 'notebook')
+TARGET_TYPE = ('user', 'note', 'subnote', 'notebook', 'comment')
 TYPE = ('remind', 'announce', 'message')
 ACTION_ENUM = ENUM(*ACTION, name='action')
 TARGET_TYPE_ENUM = ENUM(*TARGET_TYPE, name='target_type')

@@ -66,6 +66,8 @@ def notify_note_watch(note_owner_id, note_id, note_title, sender_id, session):
 def notify_note_comment():
     pass
 
+def notify_note_comment_star():
+    pass
 
 def create_remind(target_id, target_type, action, sender_id, session):
     notification = Notification(target_id=target_id,

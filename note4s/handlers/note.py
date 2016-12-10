@@ -66,10 +66,15 @@ class NoteHandler(BaseRequestHandler):
                 user_id=self.current_user.id
             ).first()
 
+            comment_count = self.session.query(Comment).filter_by(
+                note_id=note_id,
+            ).count()
+
             result['watch_count'] = watch_count
             result['is_watch'] = bool(is_watch)
             result['star_count'] = star_count
             result['is_star'] = bool(is_star)
+            result['comment_count'] = comment_count
             self.api_success_response(result)
 
     def post(self, *args, **kwargs):
@@ -241,38 +246,3 @@ class StarNoteHandler(BaseRequestHandler):
         self.session.delete(star)
         self.session.commit()
         self.api_success_response(True)
-
-
-class NoteCommentHandler(BaseRequestHandler):
-    def get(self, note_id):
-        note = self.session.query(Note).filter(Note.id == note_id).first()
-        if not note:
-            self.api_fail_response(f'Note {note_id} does not exist.')
-            return
-        comments = self.session.query(Comment).filter(Comment.note_id == note_id).all()
-        result = {}
-        result["note"] = note.to_dict()
-        result["comments"] = [comment.to_dict() for comment in comments]
-        self.api_success_response(result)
-
-    def post(self, note_id):
-        note = self.session.query(Note).filter(Note.id == note_id).first()
-        if not note:
-            self.api_fail_response(f'Note {note_id} does not exist.')
-            return
-        params = self.get_params()
-        content = params.get("content")
-        reply_to = params.get("reply_to")
-        if not content:
-            self.api_fail_response(f'Invalid comment.')
-            return
-        comment_count = self.session.query(Comment).filter_by(note_id = note_id).count()
-        comment = Comment(content=content,
-                          note_id=note_id,
-                          user_id=self.current_user.id,
-                          index=comment_count + 1,
-                          reply_to=reply_to)
-        self.session.add(comment)
-        self.session.commit()
-        self.api_success_response(comment.to_dict())
-
