@@ -29,6 +29,10 @@ class BaseHTTPTestCase(AsyncHTTPTestCase):
         result = self.fetch(url, method="POST", **kwargs)
         return self.prepare_result(result)
 
+    def delete(self, url, **kwargs):
+        result = self.fetch(url, method="DELETE", **kwargs)
+        return self.prepare_result(result)
+
     def prepare_result(self, result):
         try:
             data = json.loads(result.body.decode('utf-8'))

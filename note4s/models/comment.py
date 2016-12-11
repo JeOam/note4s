@@ -10,7 +10,7 @@ from sqlalchemy import (
     Integer,
     Boolean
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from .base import BaseModel
 
 class Comment(BaseModel):
@@ -19,5 +19,5 @@ class Comment(BaseModel):
     content = Column(String, nullable=False)
     index = Column(Integer)
     reply_to = Column(UUID(as_uuid=True))
-    star = Column(Integer, default=0)
+    star_ids = Column(ARRAY(UUID(as_uuid=True), dimensions=1), default=[])
     is_valid = Column(Boolean, default=True)
