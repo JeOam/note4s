@@ -4,9 +4,10 @@
     comment.py
     ~~~~~~~
 """
-from .base import BaseRequestHandler
+from sqlalchemy import asc
 from note4s.models import Note, Comment
 from note4s.service.notify import notify_note_comment, notify_note_comment_star
+from .base import BaseRequestHandler
 
 class NoteCommentHandler(BaseRequestHandler):
     def get(self, note_id):
@@ -14,10 +15,26 @@ class NoteCommentHandler(BaseRequestHandler):
         if not note:
             self.api_fail_response(f'Note {note_id} does not exist.')
             return
-        comments = self.session.query(Comment).filter(Comment.note_id == note_id).all()
+        comments = self.session.query(Comment).filter(
+            Comment.note_id == note_id
+        ).order_by(
+            asc(Comment.index)
+        ).all()
         result = {}
         result["note"] = note.to_dict()
         result["comments"] = [comment.to_dict() for comment in comments]
+        for comment in result["comments"]:
+            if comment["star_ids"]:
+                comment["star_count"] = len(comment["star_ids"])
+                if self.current_user.id in comment["star_ids"]:
+                    comment["is_star"] = True
+                else:
+                    comment["is_star"] = False
+                del comment["star_ids"]
+            else:
+                del comment["star_ids"]
+                comment["star_count"] = 0
+                comment["is_star"] = False
         self.api_success_response(result)
 
     def post(self, note_id):
@@ -55,7 +72,6 @@ class StarCommentHandler(BaseRequestHandler):
         if not comment:
             self.api_fail_response(f'Comment {comment_id} does not exist.')
             return
-
         if self.current_user.id not in comment.star_ids:
             star_ids = [item for item in comment.star_ids]
             star_ids.append(self.current_user.id)
