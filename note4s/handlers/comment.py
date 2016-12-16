@@ -6,8 +6,9 @@
 """
 from sqlalchemy import asc
 from note4s.models import Note, Comment
-from note4s.service.notify import notify_note_comment, notify_note_comment_star
+from note4s.service.notify import notify_note_comment, notify_comment_reply, notify_comment_star
 from .base import BaseRequestHandler
+
 
 class NoteCommentHandler(BaseRequestHandler):
     def get(self, note_id):
@@ -48,7 +49,7 @@ class NoteCommentHandler(BaseRequestHandler):
         if not content:
             self.api_fail_response(f'Invalid comment.')
             return
-        comment_count = self.session.query(Comment).filter_by(note_id = note_id).count()
+        comment_count = self.session.query(Comment).filter_by(note_id=note_id).count()
         comment = Comment(content=content,
                           note_id=note_id,
                           user_id=self.current_user.id,
@@ -56,13 +57,32 @@ class NoteCommentHandler(BaseRequestHandler):
                           reply_to=reply_to)
         self.session.add(comment)
         self.session.commit()
-        if note.user_id != self.current_user.id:
-            notify_note_comment(
-                note_owner_id=comment.user_id,
-                comment_id=comment.id,
-                sender_id=self.current_user.id,
-                session=self.session
-            )
+        if reply_to:
+            to_comment = self.session.query(Comment).filter_by(id=reply_to).first()
+            if to_comment:
+                if to_comment.user_id != self.current_user.id:  # 不是自己回复自己的评论
+                    notify_comment_reply(
+                        to_user_id=to_comment.user_id,
+                        comment_id=comment.id,
+                        sender_id=self.current_user.id,
+                        session=self.session
+                    )
+                if note.user_id != self.current_user.id:  # 回复的同时，不是在评论自己的笔记
+                    notify_note_comment(
+                        note_owner_id=note.user_id,
+                        comment_id=comment.id,
+                        sender_id=self.current_user.id,
+                        session=self.session
+                    )
+        else:
+            if note.user_id != self.current_user.id:
+                notify_note_comment(
+                    note_owner_id=note.user_id,
+                    comment_id=comment.id,
+                    sender_id=self.current_user.id,
+                    session=self.session
+                )
+
         self.api_success_response(comment.to_dict())
 
 
@@ -80,8 +100,8 @@ class StarCommentHandler(BaseRequestHandler):
         self.session.commit()
 
         if comment.user_id != self.current_user.id:
-            notify_note_comment_star(
-                note_owner_id=comment.user_id,
+            notify_comment_star(
+                comment_owner_id=comment.user_id,
                 comment_id=comment.id,
                 sender_id=self.current_user.id,
                 session=self.session

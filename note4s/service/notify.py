@@ -66,11 +66,54 @@ def notify_note_watch(note_owner_id, note_id, note_title, sender_id, session):
 
 
 def notify_note_comment(note_owner_id, comment_id, sender_id, session):
-    pass
+    notification = Notification(
+        type=N_TYPE[0],
+        target_id=comment_id,
+        target_type=N_TARGET_TYPE[4],
+        action=N_ACTION[2],
+        sender_id=sender_id,
+    )
+    user_notification = UserNotification(
+        user_id=note_owner_id,
+        notification_id=notification.id
+    )
+    session.add(notification)
+    session.add(user_notification)
+    session.commit()
 
 
-def notify_note_comment_star(note_owner_id, comment_id, sender_id, session):
-    pass
+def notify_comment_reply(to_user_id, comment_id, sender_id, session):
+    notification = Notification(
+        type=N_TYPE[0],
+        target_id=comment_id,
+        target_type=N_TARGET_TYPE[4],
+        action=N_ACTION[6],
+        sender_id=sender_id,
+    )
+    user_notification = UserNotification(
+        user_id=to_user_id,
+        notification_id=notification.id
+    )
+    session.add(notification)
+    session.add(user_notification)
+    session.commit()
+
+
+def notify_comment_star(comment_owner_id, comment_id, sender_id, session):
+    notification = Notification(
+        type=N_TYPE[0],
+        target_id=comment_id,
+        target_type=N_TARGET_TYPE[4],
+        action=N_ACTION[3],
+        sender_id=sender_id,
+    )
+    user_notification = UserNotification(
+        user_id=comment_owner_id,
+        notification_id=notification.id
+    )
+    session.add(notification)
+    session.add(user_notification)
+    session.commit()
 
 
 def create_remind(target_id, target_type, action, sender_id, session):
