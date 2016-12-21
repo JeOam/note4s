@@ -5,7 +5,8 @@
     ~~~~~~~
 """
 from .user import LoginHandler, RegisterHandler, \
-    CheckHandler, ProfileHandler, FollowHandler
+    CheckHandler, ProfileHandler, FollowHandler, \
+    NotificationHandler
 from .note import NoteHandler, SubNoteHandler, \
     WatchNoteHandler, StarNoteHandler
 from .notebook import NotebookHandler

@@ -9,8 +9,9 @@ from note4s.models import Notification, UserNotification
 from .base import BaseHTTPTestCase
 from .conftest import session
 
+
 class NofiticationTestCase(BaseHTTPTestCase):
-    @pytest.mark.usefixtures("user", "note", "another_user", "another_token")
+    @pytest.mark.usefixtures("user", "token", "note", "another_user", "another_token")
     def test_star_note_notify_owner(self):
         result = self.post(f'/api/note/star/{self.note.id.hex}', body={}, headers={'Authorization': self.another_token})
         assert result["code"] == 200
@@ -27,9 +28,23 @@ class NofiticationTestCase(BaseHTTPTestCase):
         assert user_notification.notification_id == notification.id
         assert user_notification.is_read is False
 
-    @pytest.mark.usefixtures("user", "note", "another_user", "another_token")
+        result = self.get(f'/api/user/notification/', headers={'Authorization': self.token})
+        assert result["code"] == 200
+        data = result["data"]
+        assert data["unread_count"] == 1
+        assert len(data["generals"]) == 0
+        assert len(data["follows"]) == 0
+        assert len(data["stars"]) == 1
+        notification = data["stars"][0]
+        assert notification["is_read"] is False
+        assert notification["target_id"] == self.note.id.hex
+        assert notification["target_type"] == 'note'
+        assert notification["action"] == 'star'
+
+    @pytest.mark.usefixtures("user", "token", "note", "another_user", "another_token")
     def test_watch_note_notify_owner(self):
-        result = self.post(f'/api/note/watch/{self.note.id.hex}', body={}, headers={'Authorization': self.another_token})
+        result = self.post(f'/api/note/watch/{self.note.id.hex}', body={},
+                           headers={'Authorization': self.another_token})
         assert result["code"] == 200
         notification = session.query(Notification).filter_by(target_id=self.note.id).one()
         user_notification = session.query(UserNotification).filter_by(user_id=self.user.id).one()
@@ -43,6 +58,18 @@ class NofiticationTestCase(BaseHTTPTestCase):
         assert user_notification
         assert user_notification.notification_id == notification.id
         assert user_notification.is_read is False
+        result = self.get(f'/api/user/notification/', headers={'Authorization': self.token})
+        assert result["code"] == 200
+        data = result["data"]
+        assert data["unread_count"] == 1
+        assert len(data["generals"]) == 0
+        assert len(data["follows"]) == 0
+        assert len(data["stars"]) == 1
+        notification = data["stars"][0]
+        assert notification["is_read"] is False
+        assert notification["target_id"] == self.note.id.hex
+        assert notification["target_type"] == 'note'
+        assert notification["action"] == 'watch'
 
     @pytest.mark.usefixtures("user", "note", "another_user", "another_token")
     def test_comment_note_notify_owner(self):

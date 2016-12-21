@@ -9,6 +9,7 @@ from .base import BaseRequestHandler
 from note4s.models import Note, Notebook, Watch, Star, N_TARGET_TYPE, Comment
 from note4s.service.notify import notify_new_note, notify_note_star, notify_note_watch
 
+
 class NoteHandler(BaseRequestHandler):
     def get(self, note_id):
         notes = self.session.query(Note). \

@@ -9,13 +9,15 @@ from note4s.handlers import \
     CheckHandler, ProfileHandler, \
     NoteHandler, SubNoteHandler, \
     WatchNoteHandler, StarNoteHandler, \
-    NotebookHandler, NoteCommentHandler, StarCommentHandler
+    NotebookHandler, NoteCommentHandler, StarCommentHandler, \
+    NotificationHandler
 
 api_handlers = [
     (r'/auth/login/', LoginHandler),
     (r'/auth/register/?', RegisterHandler),
     (r'/auth/checkusername/', CheckHandler),
     (r'/api/profile/', ProfileHandler),
+    (r'/api/user/notification/', NotificationHandler),
     (r'/api/follow/(?P<user_id>[0-9a-f]{32}\Z)?', FollowHandler),
     (r'/api/note/', NoteHandler),
     (r'/api/subnote/', SubNoteHandler),

@@ -6,7 +6,9 @@
 """
 from werkzeug.security import generate_password_hash
 from sqlalchemy.orm import exc
-from note4s.models import User, Watch, N_TARGET_TYPE
+from sqlalchemy import desc
+from note4s.models import User, Watch, N_TARGET_TYPE, \
+    UserNotification, Notification, N_ACTION
 from note4s.utils import create_jwt
 from .base import BaseRequestHandler
 
@@ -108,3 +110,45 @@ class FollowHandler(BaseRequestHandler):
         self.session.delete(watch)
         self.session.commit()
         self.api_success_response(True)
+
+
+class NotificationHandler(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        user_notifications = self.session.query(
+            UserNotification
+        ).filter_by(
+            user_id=self.current_user.id
+        ).order_by(
+            desc(UserNotification.created)
+        ).all()
+        result = {}
+        stars = []
+        follows = []
+        generals = []
+        unread_count = 0
+        for user_notification in user_notifications:
+            info = {}
+            info["id"] = user_notification.notification_id.hex
+            info["is_read"] = user_notification.is_read
+            notification = self.session.query(Notification).filter_by(id=user_notification.notification_id).one()
+            info["target_id"] = notification.target_id.hex
+            info["target_type"] = notification.target_type
+            info["target_desc"] = notification.target_desc
+            info["action"] = notification.action
+            info["sender_id"] = notification.sender_id.hex
+            sender = self.session.query(User).filter_by(id=notification.sender_id).one()
+            info["sender_name"] = sender.username
+            if (notification.action is N_ACTION[3] and notification.target_type is not N_TARGET_TYPE[0]) or notification.action is N_ACTION[4]:
+                stars.append(info)
+            elif (notification.action is N_ACTION[3]
+                  and notification.target_type is N_TARGET_TYPE[0]):
+                follows.append(info)
+            else:
+                generals.append(info)
+            if not user_notification.is_read:
+                unread_count += 1
+        result["unread_count"] = unread_count
+        result["generals"] = generals
+        result["stars"] = stars
+        result["follows"] = follows
+        self.api_success_response(result)
