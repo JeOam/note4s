@@ -108,12 +108,15 @@ class NoteHandler(BaseRequestHandler):
                 keys = set(['title', 'content', 'notebook_id', 'section_id'])
 
             params = self.get_params()
-            if params.get('section_id') and note.section_id != params.get('section_id'):
+            if (params.get('section_id') and note.section_id != params.get('section_id')) or \
+                    params.get('title'):
                 notebook = self.session.query(Notebook).filter_by(note_id=note.id).first()
                 if notebook:
-                    notebook.parent_id = params.get('section_id')
+                    if params.get('title'):
+                        notebook.name = params.get('title')
+                    if params.get('section_id'):
+                        notebook.parent_id = params.get('section_id')
                     self.session.add(notebook)
-
             self.update_modal(note, keys)
             self.session.commit()
             self.api_success_response(note.to_dict())
