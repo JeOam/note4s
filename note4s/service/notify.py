@@ -65,13 +65,14 @@ def notify_note_watch(note_owner_id, note_id, note_title, sender_id, session):
     session.commit()
 
 
-def notify_note_comment(note_owner_id, comment_id, sender_id, session):
+def notify_note_comment(note_owner_id, note_id, comment_id, sender_id, session):
     notification = Notification(
         type=N_TYPE[0],
-        target_id=comment_id,
-        target_type=N_TARGET_TYPE[4],
+        target_id=note_id,
+        target_type=N_TARGET_TYPE[1],
         action=N_ACTION[2],
         sender_id=sender_id,
+        anchor=comment_id
     )
     user_notification = UserNotification(
         user_id=note_owner_id,

@@ -35,11 +35,11 @@ class NofiticationTestCase(BaseHTTPTestCase):
         assert len(data["generals"]) == 0
         assert len(data["follows"]) == 0
         assert len(data["stars"]) == 1
-        notification = data["stars"][0]
-        assert notification["is_read"] is False
-        assert notification["target_id"] == self.note.id.hex
-        assert notification["target_type"] == 'note'
-        assert notification["action"] == 'star'
+        _notification = data["stars"][0]
+        assert _notification["is_read"] is False
+        assert _notification["target_id"] == self.note.id.hex
+        assert _notification["target_type"] == 'note'
+        assert _notification["action"] == 'star'
 
     @pytest.mark.usefixtures("user", "token", "note", "another_user", "another_token")
     def test_watch_note_notify_owner(self):
@@ -58,6 +58,7 @@ class NofiticationTestCase(BaseHTTPTestCase):
         assert user_notification
         assert user_notification.notification_id == notification.id
         assert user_notification.is_read is False
+
         result = self.get(f'/api/user/notification/', headers={'Authorization': self.token})
         assert result["code"] == 200
         data = result["data"]
@@ -65,13 +66,13 @@ class NofiticationTestCase(BaseHTTPTestCase):
         assert len(data["generals"]) == 0
         assert len(data["follows"]) == 0
         assert len(data["stars"]) == 1
-        notification = data["stars"][0]
-        assert notification["is_read"] is False
-        assert notification["target_id"] == self.note.id.hex
-        assert notification["target_type"] == 'note'
-        assert notification["action"] == 'watch'
+        _notification = data["stars"][0]
+        assert _notification["is_read"] is False
+        assert _notification["target_id"] == self.note.id.hex
+        assert _notification["target_type"] == 'note'
+        assert _notification["action"] == 'watch'
 
-    @pytest.mark.usefixtures("user", "note", "another_user", "another_token")
+    @pytest.mark.usefixtures("user", "token", "note", "another_user", "another_token")
     def test_comment_note_notify_owner(self):
         params = {
             "content": "test comment"
@@ -79,17 +80,32 @@ class NofiticationTestCase(BaseHTTPTestCase):
         result = self.post(f'/api/note/comment/{self.note.id.hex}', body=params,
                            headers={'Authorization': self.another_token})
         assert result["code"] == 200
-        notification = session.query(Notification).filter_by(target_id=result["data"]["id"], action="comment").one()
+        notification = session.query(Notification).filter_by(target_id=self.note.id.hex, action="comment").one()
         user_notification = session.query(UserNotification).filter_by(user_id=self.user.id).one()
         assert notification
-        assert notification.target_id.hex == result["data"]["id"]
-        assert notification.target_type == 'comment'
+        assert notification.target_id.hex == self.note.id.hex
+        assert notification.anchor.hex == result["data"]["id"]
+        assert notification.target_type == 'note'
         assert notification.action == 'comment'
         assert notification.type == 'remind'
         assert notification.sender_id == self.another_user.id
         assert user_notification
         assert user_notification.notification_id == notification.id
         assert user_notification.is_read is False
+
+        result = self.get(f'/api/user/notification/', headers={'Authorization': self.token})
+        assert result["code"] == 200
+        data = result["data"]
+        assert data["unread_count"] == 1
+        assert len(data["generals"]) == 1
+        assert len(data["follows"]) == 0
+        assert len(data["stars"]) == 0
+        _notification = data["generals"][0]
+        assert _notification["is_read"] is False
+        assert _notification["target_id"] == self.note.id.hex
+        assert _notification["target_type"] == 'note'
+        assert _notification["action"] == 'comment'
+        assert _notification["anchor"] == notification.anchor.hex
 
     @pytest.mark.usefixtures("user", "token", "note", "another_user", "another_token")
     def test_reply_comment_notify_owner(self):
@@ -117,6 +133,19 @@ class NofiticationTestCase(BaseHTTPTestCase):
         assert user_notification.notification_id == notification.id
         assert user_notification.is_read is False
 
+        result = self.get(f'/api/user/notification/', headers={'Authorization': self.another_token})
+        assert result["code"] == 200
+        data = result["data"]
+        assert data["unread_count"] == 1
+        assert len(data["generals"]) == 1
+        assert len(data["follows"]) == 0
+        assert len(data["stars"]) == 0
+        _notification = data["generals"][0]
+        assert _notification["is_read"] is False
+        assert _notification["target_id"] == notification.target_id.hex
+        assert _notification["target_type"] == 'comment'
+        assert _notification["action"] == 'reply'
+
     @pytest.mark.usefixtures("user", "token", "note", "another_user", "another_token")
     def test_star_comment_notify_owner(self):
         params = {
@@ -142,3 +171,16 @@ class NofiticationTestCase(BaseHTTPTestCase):
         assert user_notification
         assert user_notification.notification_id == notification.id
         assert user_notification.is_read is False
+
+        result = self.get(f'/api/user/notification/', headers={'Authorization': self.another_token})
+        assert result["code"] == 200
+        data = result["data"]
+        assert data["unread_count"] == 1
+        assert len(data["generals"]) == 0
+        assert len(data["follows"]) == 0
+        assert len(data["stars"]) == 1
+        _notification = data["stars"][0]
+        assert _notification["is_read"] is False
+        assert _notification["target_id"] == notification.target_id.hex
+        assert _notification["target_type"] == 'comment'
+        assert _notification["action"] == 'star'

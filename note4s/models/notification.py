@@ -20,6 +20,7 @@ ACTION_ENUM = ENUM(*ACTION, name='action')
 TARGET_TYPE_ENUM = ENUM(*TARGET_TYPE, name='target_type')
 TYPE_ENUM = ENUM(*TYPE, name='type')
 
+
 class Notification(BaseModel):
     type = Column(TYPE_ENUM)
     target_id = Column(UUID(as_uuid=True))
@@ -27,6 +28,7 @@ class Notification(BaseModel):
     target_desc = Column(String)
     action = Column(ACTION_ENUM)
     sender_id = Column(UUID(as_uuid=True))
+    anchor = Column(UUID(as_uuid=True))
 
 
 class UserNotification(BaseModel):

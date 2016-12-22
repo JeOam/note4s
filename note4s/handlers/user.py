@@ -136,6 +136,7 @@ class NotificationHandler(BaseRequestHandler):
             info["target_desc"] = notification.target_desc
             info["action"] = notification.action
             info["sender_id"] = notification.sender_id.hex
+            info["anchor"] = notification.anchor.hex if notification.anchor else ""
             sender = self.session.query(User).filter_by(id=notification.sender_id).one()
             info["sender_name"] = sender.username
             if (notification.action is N_ACTION[3] and notification.target_type is not N_TARGET_TYPE[0]) or notification.action is N_ACTION[4]:

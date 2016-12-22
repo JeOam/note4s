@@ -70,6 +70,7 @@ class NoteCommentHandler(BaseRequestHandler):
                 if note.user_id != self.current_user.id:  # 回复的同时，不是在评论自己的笔记
                     notify_note_comment(
                         note_owner_id=note.user_id,
+                        note_id=note.id,
                         comment_id=comment.id,
                         sender_id=self.current_user.id,
                         session=self.session
@@ -78,6 +79,7 @@ class NoteCommentHandler(BaseRequestHandler):
             if note.user_id != self.current_user.id:
                 notify_note_comment(
                     note_owner_id=note.user_id,
+                    note_id=note.id,
                     comment_id=comment.id,
                     sender_id=self.current_user.id,
                     session=self.session
