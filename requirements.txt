@@ -8,3 +8,4 @@ pytest-env>=0.6.0
 GitPython>=2.0.8
 raven>=5.31.0
 alembic>=0.8.8
+requests>=2.12.4

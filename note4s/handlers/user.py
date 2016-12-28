@@ -4,11 +4,13 @@
     user.py
     ~~~~~~~
 """
+from datetime import datetime
 from werkzeug.security import generate_password_hash
 from sqlalchemy.orm import exc
-from sqlalchemy import desc
+from sqlalchemy import func, desc
 from note4s.models import User, Watch, N_TARGET_TYPE, \
-    UserNotification, Notification, N_ACTION
+    UserNotification, Notification, N_ACTION, \
+    Note
 from note4s.utils import create_jwt
 from .base import BaseRequestHandler
 
@@ -139,7 +141,9 @@ class NotificationHandler(BaseRequestHandler):
             info["anchor"] = notification.anchor.hex if notification.anchor else ""
             sender = self.session.query(User).filter_by(id=notification.sender_id).one()
             info["sender_name"] = sender.username
-            if (notification.action is N_ACTION[3] and notification.target_type is not N_TARGET_TYPE[0]) or notification.action is N_ACTION[4]:
+            if (notification.action is N_ACTION[3]
+                and notification.target_type is not N_TARGET_TYPE[0]) \
+                    or notification.action is N_ACTION[4]:
                 stars.append(info)
             elif (notification.action is N_ACTION[3]
                   and notification.target_type is N_TARGET_TYPE[0]):
@@ -152,4 +156,49 @@ class NotificationHandler(BaseRequestHandler):
         result["generals"] = generals
         result["stars"] = stars
         result["follows"] = follows
+        self.api_success_response(result)
+
+
+class ContributionHandler(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        begin = self.get_argument('begin', None)
+        end = self.get_argument('end', None)
+        username = self.get_argument('username', None)
+        if not begin or not end:
+            self.api_success_response({})
+            return
+        try:
+            begin_date = datetime.strptime(begin, '%Y-%m-%d')
+            end_date = datetime.strptime(end, '%Y-%m-%d')
+        except ValueError:
+            self.api_fail_response('Invalid begin or end date.')
+            return
+        else:
+            end_date = end_date.replace(hour=23, minute=59, second=59)
+
+        if not username:
+            self.api_fail_response('username is required')
+            return
+        user = self.session.query(User).filter_by(username=username).first()
+        if not user:
+            self.api_fail_response(f'user {username} is invalid')
+            return
+        query_results = self.session.query(
+            func.date_part('year', Note.created),
+            func.date_part('month', Note.created),
+            func.date_part('day', Note.created),
+            func.count(Note.id)
+        ).filter(
+            Note.user == user,
+            Note.created.between(begin_date, end_date)
+        ).group_by(
+            func.date_part('year', Note.created),
+            func.date_part('month', Note.created),
+            func.date_part('day', Note.created)
+        ).all()
+        result = {}
+        for query_result in query_results:
+            result[f'{int(query_result[0])}-'
+                   f'{int(query_result[1])}-'
+                   f'{int(query_result[2])}'] = query_result[3]
         self.api_success_response(result)

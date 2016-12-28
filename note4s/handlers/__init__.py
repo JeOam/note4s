@@ -6,8 +6,9 @@
 """
 from .user import LoginHandler, RegisterHandler, \
     CheckHandler, ProfileHandler, FollowHandler, \
-    NotificationHandler
+    NotificationHandler, ContributionHandler
 from .note import NoteHandler, SubNoteHandler, \
     WatchNoteHandler, StarNoteHandler
 from .notebook import NotebookHandler
 from .comment import NoteCommentHandler, StarCommentHandler
+from .github import GithubCallbackHandler

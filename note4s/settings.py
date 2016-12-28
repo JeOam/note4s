@@ -12,6 +12,9 @@ REDIS_HOST = os.environ.get("CDN_ANALYTICS_REDIS_HOST", "127.0.0.1")
 REDIS_PORT = os.environ.get("CDN_ANALYTICS_REDIS_PORT", 6379)
 REDIS_DB = os.environ.get("CDN_ANALYTICS_REDIS_DB", 1)
 
+GITHUB_ID = os.environ.get("GITHUB_ID", "6bc8273bcb63a84de3ba")
+GITHUB_SECRET = os.environ.get("GITHUB_ID", "426b6e5feecf23c58187b99cc285438259285ba2")
+
 PG_URL = os.environ.get("PG_URL", "postgres+psycopg2://note4s:note4s@127.0.0.1:5432/note4s?sslmode=disable")
 
 LOGGING = {
@@ -39,7 +42,7 @@ LOGGING = {
 
     'loggers': {
         '': {
-            'handlers': ['console', 'sentry'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
         },

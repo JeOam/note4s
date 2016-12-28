@@ -40,6 +40,9 @@ class BaseRequestHandler(RequestHandler):
         self.finish()
 
     def get_params(self):
+        """
+        for Method POST
+        """
         try:
             params = json.loads(self.request.body.decode('utf-8'))
         except Exception as e:

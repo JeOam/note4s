@@ -9,6 +9,7 @@ from note4s.models import Watch
 from .base import BaseHTTPTestCase
 from .conftest import session
 
+
 class UserTestCase(BaseHTTPTestCase):
     @pytest.mark.usefixtures("user")
     def test_login(self):
@@ -43,3 +44,6 @@ class UserTestCase(BaseHTTPTestCase):
         assert watch
         assert watch.target_id == self.user.id
         assert watch.user_id == self.another_user.id
+
+    def test_user_contribution(self):
+        pass
