@@ -4,6 +4,7 @@
     test_login.py
     ~~~~~~~
 """
+from datetime import datetime
 import pytest
 from note4s.models import Watch
 from .base import BaseHTTPTestCase
@@ -45,5 +46,13 @@ class UserTestCase(BaseHTTPTestCase):
         assert watch.target_id == self.user.id
         assert watch.user_id == self.another_user.id
 
+    @pytest.mark.usefixtures("note", "token")
     def test_user_contribution(self):
-        pass
+        result = self.get('/api/user/contribution/', params={
+            "begin": datetime.now().strftime('%Y-%m-%d'),
+            "end": datetime.now().strftime('%Y-%m-%d'),
+            "username": self.note.user.username
+        }, headers={'Authorization': self.token})
+        assert result["code"] == 200
+        data = result["data"]
+        assert data[datetime.now().strftime('%Y-%m-%d')] == 1

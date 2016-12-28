@@ -8,7 +8,7 @@ import json
 
 import pytest
 from tornado.testing import AsyncHTTPTestCase
-
+from tornado.httputil import url_concat
 from note4s.app import app
 
 
@@ -19,6 +19,10 @@ class BaseHTTPTestCase(AsyncHTTPTestCase):
         return self.app
 
     def get(self, url, **kwargs):
+        if 'params' in kwargs and isinstance(kwargs['params'], dict):
+            url = url_concat(url, kwargs['params'])
+            del kwargs['params']
+
         result = self.fetch(url, method="GET", **kwargs)
         return self.prepare_result(result)
 
