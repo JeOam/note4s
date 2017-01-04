@@ -15,7 +15,7 @@
 from note4s.models import (
     Notification, N_TYPE, N_TARGET_TYPE, N_ACTION,
     UserNotification,
-    Watch
+    Watch, User
 )
 
 
@@ -115,6 +115,32 @@ def notify_comment_star(comment_owner_id, comment_id, sender_id, session):
     session.add(notification)
     session.add(user_notification)
     session.commit()
+
+
+def notify_comment_mention(comment_id, mentions, sender_id, session):
+    notification = Notification(
+        type=N_TYPE[0],
+        target_id=comment_id,
+        target_type=N_TARGET_TYPE[4],
+        action=N_ACTION[5],
+        sender_id=sender_id,
+    )
+    session.add(notification)
+    count = 0
+    for username in mentions:
+        try:
+            user = session.query(User).filter_by(username=username).one()
+        except:
+            continue
+        else:
+            user_notification = UserNotification(
+                user_id=user.id,
+                notification_id=notification.id
+            )
+            session.add(user_notification)
+            count += 1
+    if count > 0:
+        session.commit()
 
 
 def create_remind(target_id, target_type, action, sender_id, session):

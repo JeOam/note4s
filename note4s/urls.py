@@ -6,7 +6,7 @@
 """
 from note4s.handlers import \
     LoginHandler, RegisterHandler, FollowHandler, \
-    CheckHandler, ProfileHandler, \
+    CheckHandler, MentionHandler, ProfileHandler, \
     NoteHandler, SubNoteHandler, \
     WatchNoteHandler, StarNoteHandler, \
     NotebookHandler, NoteCommentHandler, StarCommentHandler, \
@@ -19,6 +19,7 @@ api_handlers = [
     (r'/auth/register/?', RegisterHandler),
     (r'/auth/checkusername/', CheckHandler),
     (r'/api/profile/', ProfileHandler),
+    (r'/api/user/mention/', MentionHandler),
     (r'/api/user/notification/', NotificationHandler),
     (r'/api/user/contribution/', ContributionHandler),
     (r'/api/follow/(?P<user_id>[0-9a-f]{32}\Z)?', FollowHandler),

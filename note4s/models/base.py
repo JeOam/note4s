@@ -36,11 +36,13 @@ class Base:
         self.id = uuid.uuid4()
         _declarative_constructor(self, **kwargs)
 
-    def to_dict(self):
+    def to_dict(self, columns=[]):
         result = {}
         exclude = set(["password", "parent_id"])
         for column in self.__table__.columns:
             if column.name in exclude:
+                continue
+            if len(columns) and column.name not in columns:
                 continue
             if isinstance(getattr(self, column.name), datetime):
                 result[column.name] = str(getattr(self, column.name))

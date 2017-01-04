@@ -7,7 +7,7 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash
 from sqlalchemy.orm import exc
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, or_
 from note4s.models import User, Watch, N_TARGET_TYPE, \
     UserNotification, Notification, N_ACTION, \
     Note
@@ -64,6 +64,16 @@ class CheckHandler(BaseRequestHandler):
             self.api_success_response(True)
         else:
             self.api_success_response(False)
+
+
+class MentionHandler(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        name = self.get_argument("name")
+        users = self.session.query(User).filter(
+            or_(User.username.like(f"%{name}%"),
+                User.nickname.like(f"%{name}%"))
+        ).limit(10).all()
+        self.api_success_response([user.to_dict(['username', 'nickname']) for user in users])
 
 
 class ProfileHandler(BaseRequestHandler):

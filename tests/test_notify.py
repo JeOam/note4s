@@ -184,3 +184,27 @@ class NofiticationTestCase(BaseHTTPTestCase):
         assert _notification["target_id"] == notification.target_id.hex
         assert _notification["target_type"] == 'comment'
         assert _notification["action"] == 'star'
+
+    @pytest.mark.usefixtures("note", "user", "token", "another_user", "another_token")
+    def test_mention_comment_notify(self):
+        params = {
+            "content": "test comment @another_user",
+            "mentions": ["another_user"]
+        }
+        result = self.post(f'/api/note/comment/{self.note.id.hex}',
+                           body=params,
+                           headers={'Authorization': self.token})
+        assert isinstance(result, dict)
+        assert result["code"] == 200
+        comment_id = result["data"]["id"]
+        notification = session.query(Notification).filter_by(target_id=comment_id, action="at").one()
+        user_notification = session.query(UserNotification).filter_by(user_id=self.another_user.id).one()
+        assert notification
+        assert notification.target_id.hex == comment_id
+        assert notification.target_type == 'comment'
+        assert notification.action == 'at'
+        assert notification.type == 'remind'
+        assert notification.sender_id == self.user.id
+        assert user_notification
+        assert user_notification.notification_id == notification.id
+        assert user_notification.is_read is False

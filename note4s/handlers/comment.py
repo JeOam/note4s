@@ -6,7 +6,12 @@
 """
 from sqlalchemy import asc
 from note4s.models import Note, Comment
-from note4s.service.notify import notify_note_comment, notify_comment_reply, notify_comment_star
+from note4s.service.notify import (
+    notify_note_comment,
+    notify_comment_reply,
+    notify_comment_star,
+    notify_comment_mention
+)
 from .base import BaseRequestHandler
 
 
@@ -46,6 +51,7 @@ class NoteCommentHandler(BaseRequestHandler):
         params = self.get_params()
         content = params.get("content")
         reply_to = params.get("reply_to")
+        mentions = params.get('mentions', [])
         if not content:
             self.api_fail_response(f'Invalid comment.')
             return
@@ -57,6 +63,11 @@ class NoteCommentHandler(BaseRequestHandler):
                           reply_to=reply_to)
         self.session.add(comment)
         self.session.commit()
+        if len(mentions):
+            notify_comment_mention(comment_id=comment.id,
+                                   mentions=mentions,
+                                   sender_id=self.current_user.id,
+                                   session=self.session)
         if reply_to:
             to_comment = self.session.query(Comment).filter_by(id=reply_to).first()
             if to_comment:
@@ -84,7 +95,6 @@ class NoteCommentHandler(BaseRequestHandler):
                     sender_id=self.current_user.id,
                     session=self.session
                 )
-
         self.api_success_response(comment.to_dict())
 
 

@@ -9,8 +9,8 @@ from note4s.models import Comment
 from .base import BaseHTTPTestCase
 from .conftest import session
 
-class CommentTestCase(BaseHTTPTestCase):
 
+class CommentTestCase(BaseHTTPTestCase):
     @pytest.mark.usefixtures("note", "token")
     def test_note_comment_detail(self):
         result = self.get(f'/api/note/comment/{self.note.id.hex}', headers={'Authorization': self.token})
