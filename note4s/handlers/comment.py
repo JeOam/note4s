@@ -5,7 +5,7 @@
     ~~~~~~~
 """
 from sqlalchemy import asc
-from note4s.models import Note, Comment
+from note4s.models import Note, Comment, User
 from note4s.service.notify import (
     notify_note_comment,
     notify_comment_reply,
@@ -26,10 +26,15 @@ class NoteCommentHandler(BaseRequestHandler):
         ).order_by(
             asc(Comment.index)
         ).all()
+        user_ids = [comment.user_id for comment in comments]
+        users = self.session.query(User).filter(User.id.in_(user_ids)).all()
+        users_info = {user.id.hex: user for user in users}
         result = {}
         result["note"] = note.to_dict()
         result["comments"] = [comment.to_dict() for comment in comments]
         for comment in result["comments"]:
+            comment['username'] = users_info[comment["user_id"]].username
+            comment['avatar'] = users_info[comment["user_id"]].avatar
             if comment["star_ids"]:
                 comment["star_count"] = len(comment["star_ids"])
                 if self.current_user.id in comment["star_ids"]:

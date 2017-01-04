@@ -208,7 +208,7 @@ class ContributionHandler(BaseRequestHandler):
         ).all()
         result = {}
         for query_result in query_results:
-            result[f'{int(query_result[0])}-'
-                   f'{int(query_result[1])}-'
-                   f'{int(query_result[2])}'] = query_result[3]
+            result[f'{str(int(query_result[0])).zfill(4)}-'
+                   f'{str(int(query_result[1])).zfill(2)}-'
+                   f'{str(int(query_result[2])).zfill(2)}'] = query_result[3]
         self.api_success_response(result)

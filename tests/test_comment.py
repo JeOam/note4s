@@ -19,6 +19,25 @@ class CommentTestCase(BaseHTTPTestCase):
         assert result["data"]["note"]["id"] == self.note.id.hex
         assert result["data"]["comments"] == []
 
+        params = {
+            "content": "test comment"
+        }
+        result = self.post(f'/api/note/comment/{self.note.id.hex}',
+                           body=params,
+                           headers={'Authorization': self.token})
+        assert isinstance(result, dict)
+        assert result["code"] == 200
+
+        result = self.get(f'/api/note/comment/{self.note.id.hex}', headers={'Authorization': self.token})
+        assert isinstance(result, dict)
+        assert result["code"] == 200
+        assert result["data"]["note"]["id"] == self.note.id.hex
+        assert len(result["data"]["comments"]) == 1
+        comment = result["data"]["comments"][0]
+        assert comment["id"]
+        assert comment["avatar"] == "http://placehold.it/128x128"
+        assert comment["username"] == "test_user"
+
     @pytest.mark.usefixtures("note", "user", "token", "another_user", "another_token")
     def test_create_comment(self):
         params = {

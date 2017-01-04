@@ -30,7 +30,8 @@ def database(request):
 def user(database, request):
     user = User(username="test_user",
                 email="test@test.com",
-                password=generate_password_hash("123456"))
+                password=generate_password_hash("123456"),
+                avatar="http://placehold.it/128x128")
     session.add(user)
     session.commit()
 
@@ -46,7 +47,8 @@ def user(database, request):
 def another_user(database, request):
     user = User(username="another_user",
                 email="test@test.cn",
-                password=generate_password_hash("123456"))
+                password=generate_password_hash("123456"),
+                avatar="http://placehold.it/128x128")
     session.add(user)
     session.commit()
 
