@@ -21,12 +21,17 @@ class NotebookHandler(BaseRequestHandler):
                 else:
                     temp[notebook.parent_id.hex] = [notebook.to_dict()]
             else:
-                result.append(notebook.to_dict())
+                notebook_info = notebook.to_dict()
+                notebook_info["type"] = "notebook"
+                result.append(notebook_info)
         for notebook in result:
             sections = temp.get(notebook["id"], [])
             notebook["children"] = []
             for section in sections:
+                section["type"] = "section"
                 notes = temp.get(section["id"], [])
+                for note in notes:
+                    note["type"] = "note"
                 section["children"] = notes
                 notebook["children"].append(section)
         self.api_success_response(result)
