@@ -104,6 +104,7 @@ class NofiticationTestCase(BaseHTTPTestCase):
         assert _notification["is_read"] is False
         assert _notification["target_id"] == self.note.id.hex
         assert _notification["target_type"] == 'note'
+        assert _notification["target_desc"] == self.note.title
         assert _notification["action"] == 'comment'
         assert _notification["anchor"] == notification.anchor.hex
 
@@ -160,10 +161,10 @@ class NofiticationTestCase(BaseHTTPTestCase):
                            headers={'Authorization': self.token})
         assert result["code"] == 200
         assert result["data"] == 1
-        notification = session.query(Notification).filter_by(target_id=comment_id, action="star").one()
+        notification = session.query(Notification).filter_by(target_id=self.note.id, target_type="comment", action="star").one()
         user_notification = session.query(UserNotification).filter_by(user_id=self.another_user.id).one()
         assert notification
-        assert notification.target_id.hex == comment_id
+        assert notification.target_id == self.note.id
         assert notification.target_type == 'comment'
         assert notification.action == 'star'
         assert notification.type == 'remind'
@@ -197,14 +198,19 @@ class NofiticationTestCase(BaseHTTPTestCase):
         assert isinstance(result, dict)
         assert result["code"] == 200
         comment_id = result["data"]["id"]
-        notification = session.query(Notification).filter_by(target_id=comment_id, action="at").one()
+        notification = session.query(Notification).filter_by(
+            target_id=self.note.id.hex,
+            target_type="comment",
+            action="at"
+        ).one()
         user_notification = session.query(UserNotification).filter_by(user_id=self.another_user.id).one()
         assert notification
-        assert notification.target_id.hex == comment_id
+        assert notification.target_id.hex == self.note.id.hex
         assert notification.target_type == 'comment'
         assert notification.action == 'at'
         assert notification.type == 'remind'
         assert notification.sender_id == self.user.id
+        assert notification.anchor.hex == comment_id
         assert user_notification
         assert user_notification.notification_id == notification.id
         assert user_notification.is_read is False

@@ -50,6 +50,7 @@ class NoteCommentHandler(BaseRequestHandler):
 
     def post(self, note_id):
         note = self.session.query(Note).filter(Note.id == note_id).first()
+        note_owner = self.session.query(User).filter(User.id == note.user_id).first()
         if not note:
             self.api_fail_response(f'Note {note_id} does not exist.')
             return
@@ -68,8 +69,11 @@ class NoteCommentHandler(BaseRequestHandler):
                           reply_to=reply_to)
         self.session.add(comment)
         self.session.commit()
+        mentions = [username for username in mentions if (note_owner and username != note_owner.username)]
         if len(mentions):
-            notify_comment_mention(comment_id=comment.id,
+            notify_comment_mention(note_id=note.id,
+                                   note_title=note.title,
+                                   comment_id=comment.id,
                                    mentions=mentions,
                                    sender_id=self.current_user.id,
                                    session=self.session)
@@ -87,6 +91,7 @@ class NoteCommentHandler(BaseRequestHandler):
                     notify_note_comment(
                         note_owner_id=note.user_id,
                         note_id=note.id,
+                        note_title=note.title,
                         comment_id=comment.id,
                         sender_id=self.current_user.id,
                         session=self.session
@@ -96,6 +101,7 @@ class NoteCommentHandler(BaseRequestHandler):
                 notify_note_comment(
                     note_owner_id=note.user_id,
                     note_id=note.id,
+                    note_title=note.title,
                     comment_id=comment.id,
                     sender_id=self.current_user.id,
                     session=self.session
@@ -109,6 +115,10 @@ class StarCommentHandler(BaseRequestHandler):
         if not comment:
             self.api_fail_response(f'Comment {comment_id} does not exist.')
             return
+        note = self.session.query(Note).filter_by(id=comment.note_id).first()
+        if not note:
+            self.api_fail_response(f'Note {comment.note_id} does not exist.')
+            return
         if self.current_user.id not in comment.star_ids:
             star_ids = [item for item in comment.star_ids]
             star_ids.append(self.current_user.id)
@@ -119,6 +129,8 @@ class StarCommentHandler(BaseRequestHandler):
         if comment.user_id != self.current_user.id:
             notify_comment_star(
                 comment_owner_id=comment.user_id,
+                note_id=comment.note_id,
+                note_title=note.title,
                 comment_id=comment.id,
                 sender_id=self.current_user.id,
                 session=self.session
