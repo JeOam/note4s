@@ -6,7 +6,7 @@
 """
 from .user import LoginHandler, RegisterHandler, \
     CheckHandler, MentionHandler, \
-    ProfileHandler, FollowHandler, \
+    ProfileHandler, FollowHandler, Unfollowandler, \
     NotificationHandler, ContributionHandler
 from .note import NoteHandler, SubNoteHandler, \
     WatchNoteHandler, StarNoteHandler

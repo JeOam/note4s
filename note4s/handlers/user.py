@@ -10,7 +10,7 @@ from sqlalchemy.orm import exc
 from sqlalchemy import func, desc, or_
 from note4s.models import User, Watch, N_TARGET_TYPE, \
     UserNotification, Notification, N_ACTION, \
-    Note
+    Note, Notebook, Star
 from note4s.utils import create_jwt
 from .base import BaseRequestHandler
 
@@ -78,44 +78,88 @@ class MentionHandler(BaseRequestHandler):
 
 class ProfileHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
-        user = self.current_user
-        self.api_success_response(user.to_dict())
+        username = self.get_argument("username", None)
+        if username:
+            user = self.session.query(User).filter_by(username=username).first()
+            if not user:
+                self.api_fail_response(f'User {username} does not exist.')
+                return
+        else:
+            user = self.current_user
+
+        result = user.to_dict()
+        notebook_count = self.session.query(Notebook).filter_by(user=user, parent_id=None).count()
+        star_count = self.session.query(Star).filter(
+            Star.user_id == user.id,
+            or_(
+                Star.target_type == N_TARGET_TYPE[1],
+                Star.target_type == N_TARGET_TYPE[3],
+            )
+        ).count()
+        follower_count = self.session.query(Watch).filter(
+            Watch.target_id == user.id,
+            Watch.target_type == N_TARGET_TYPE[0]
+        ).count()
+        following_count = self.session.query(Watch).filter(
+            Watch.user_id == user.id,
+            Watch.target_type == N_TARGET_TYPE[0],
+        ).count()
+        if username and self.current_user.username != username:
+            followed = self.session.query(Watch).filter(
+                Watch.target_id == user.id,
+                Watch.target_type == N_TARGET_TYPE[0],
+                Watch.user_id == self.current_user.id
+            ).count()
+            result["followed"] = True if followed else False
+        result["notebook_count"] = notebook_count
+        result["star_count"] = star_count
+        result["follower_count"] = follower_count
+        result["following_count"] = following_count
+        self.api_success_response(result)
 
 
 class FollowHandler(BaseRequestHandler):
-    def post(self, user_id):
-        user = self.session.query(User).filter(User.id == user_id).first()
+    def post(self):
+        params = self.get_params()
+        username = params.get("username", None)
+        if not username:
+            self.api_fail_response(f'username cannot be empty.')
+            return
+        user = self.session.query(User).filter(User.username == username).first()
         if not user:
-            self.api_fail_response(f'User {user_id} does not exist.')
+            self.api_fail_response(f'User {username} does not exist.')
             return
 
         watch = self.session.query(Watch).filter_by(
-            target_id=user_id,
+            target_id=user.id,
             target_type=N_TARGET_TYPE[0],
             user_id=self.current_user.id
         ).first()
-        watch_count = self.session.query(Watch).filter_by(
-            target_id=user_id,
-            target_type=N_TARGET_TYPE[0]
-        ).count()
         if watch:
-            self.api_success_response(watch_count)
+            self.api_success_response(True)
             return
 
-        watch = Watch(target_id=user_id,
+        watch = Watch(target_id=user.id,
                       target_type=N_TARGET_TYPE[0],
                       user_id=self.current_user.id)
         self.session.add(watch)
         self.session.commit()
-        self.api_success_response(watch_count + 1)
+        self.api_success_response(True)
 
-    def delete(self, user_id):
-        user = self.session.query(User).filter(User.id == user_id).first()
+
+class Unfollowandler(BaseRequestHandler):
+    def post(self):
+        params = self.get_params()
+        username = params.get("username", None)
+        if not username:
+            self.api_fail_response(f'username cannot be empty.')
+            return
+        user = self.session.query(User).filter(User.username == username).first()
         if not user:
-            self.api_fail_response(f'User {user_id} does not exist.')
+            self.api_fail_response(f'User {username} does not exist.')
             return
         watch = self.session.query(Watch).filter_by(
-            target_id=user_id,
+            target_id=user.id,
             target_type=N_TARGET_TYPE[0],
             user_id=self.current_user.id
         ).first()

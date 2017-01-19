@@ -6,7 +6,7 @@
 """
 from datetime import datetime
 import pytest
-from note4s.models import Watch
+from note4s.models import Watch, N_TARGET_TYPE
 from .base import BaseHTTPTestCase
 from .conftest import session
 
@@ -38,13 +38,32 @@ class UserTestCase(BaseHTTPTestCase):
 
     @pytest.mark.usefixtures("user", "another_user", "another_token")
     def test_follow_user(self):
-        result = self.post(f'/api/follow/{self.user.id.hex}', body={}, headers={'Authorization': self.another_token})
+        result = self.post(
+            '/api/user/follow/',
+            body={"username": self.user.username},
+            headers={'Authorization': self.another_token}
+        )
         assert result["code"] == 200
-        assert result["data"] == 1
-        watch = session.query(Watch).first()
-        assert watch
-        assert watch.target_id == self.user.id
-        assert watch.user_id == self.another_user.id
+        assert result["data"] is True
+        watch = session.query(Watch).filter_by(
+            target_id=self.user.id,
+            target_type=N_TARGET_TYPE[0],
+            user_id=self.another_user.id
+        ).count()
+        assert watch == 1
+        result = self.post(
+            '/api/user/unfollow/',
+            body={"username": self.user.username},
+            headers={'Authorization': self.another_token}
+        )
+        assert result["code"] == 200
+        assert result["data"] is True
+        watch = session.query(Watch).filter_by(
+            target_id=self.user.id,
+            target_type=N_TARGET_TYPE[0],
+            user_id=self.another_user.id
+        ).count()
+        assert watch == 0
 
     @pytest.mark.usefixtures("note", "token")
     def test_user_contribution(self):
