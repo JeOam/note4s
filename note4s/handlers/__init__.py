@@ -10,6 +10,6 @@ from .user import LoginHandler, RegisterHandler, \
     NotificationHandler, ContributionHandler
 from .note import NoteHandler, SubNoteHandler, \
     WatchNoteHandler, StarNoteHandler
-from .notebook import NotebookHandler
+from .notebook import NotebooksHandler, NotebookHandler
 from .comment import NoteCommentHandler, StarCommentHandler
 from .github import GithubCallbackHandler

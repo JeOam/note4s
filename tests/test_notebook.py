@@ -41,6 +41,20 @@ class NotebookTestCase(BaseHTTPTestCase):
         assert len(result["data"][1]["children"][0]["children"]) == 0
         assert result["data"][0]["children"][0]["children"][0]["type"] == "note"
 
+        notebook_id = result["data"][0]["id"]
+        result = self.get(f'/api/notebook/{notebook_id}', headers={'Authorization': self.token})
+        assert isinstance(result, dict)
+        assert result["code"] == 200
+        notebook = result["data"]
+        assert notebook["name"] == "test notebook1"
+        assert len(notebook["children"]) == 1
+        assert len(notebook["children"][0]["children"]) == 1
+        assert notebook["user"]
+        user = notebook["user"]
+        assert user["note_count"] == 1
+        assert user["following_count"] == 0
+        assert user["follower_count"] == 0
+
     @pytest.mark.usefixtures("token")
     def test_get_notebook_without_fixture(self):
         result = self.get('/api/notebook/', headers={'Authorization': self.token})

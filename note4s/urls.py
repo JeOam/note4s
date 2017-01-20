@@ -10,7 +10,8 @@ from note4s.handlers import \
     CheckHandler, MentionHandler, ProfileHandler, \
     NoteHandler, SubNoteHandler, \
     WatchNoteHandler, StarNoteHandler, \
-    NotebookHandler, NoteCommentHandler, StarCommentHandler, \
+    NotebooksHandler, NotebookHandler, \
+    NoteCommentHandler, StarCommentHandler, \
     NotificationHandler, ContributionHandler, \
     GithubCallbackHandler
 
@@ -32,7 +33,7 @@ api_handlers = [
     (r'/api/note/comment/star/(?P<comment_id>[0-9a-f]{32}\Z)?', StarCommentHandler),
     (r'/api/note/watch/(?P<note_id>[0-9a-f]{32}\Z)?', WatchNoteHandler),
     (r'/api/note/star/(?P<note_id>[0-9a-f]{32}\Z)?', StarNoteHandler),
-    (r'/api/notebook/?', NotebookHandler),
+    (r'/api/notebook/?', NotebooksHandler),
     (r'/api/notebook/(?P<notebook_id>[0-9a-f]{32}\Z)?', NotebookHandler)
 ]
 
