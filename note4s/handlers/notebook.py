@@ -76,6 +76,7 @@ class NotebookHandler(BaseRequestHandler):
         if not user:
             self.api_fail_response(f'Notebook {notebook_id} does not belong to any user.')
             return
+        notebook_count = self.session.query(Notebook).filter_by(user=user, parent_id=None).count()
         note_count = self.session.query(Note).filter_by(user_id=user.id).count()
         following_count = self.session.query(Watch).filter_by(
             target_type=N_TARGET_TYPE[0],
@@ -86,6 +87,7 @@ class NotebookHandler(BaseRequestHandler):
             target_type=N_TARGET_TYPE[0]
         ).count()
         userinfo = user.to_dict()
+        userinfo["notebook_count"] = notebook_count
         userinfo["note_count"] = note_count
         userinfo["following_count"] = following_count
         userinfo["follower_count"] = follower_count

@@ -89,6 +89,7 @@ class ProfileHandler(BaseRequestHandler):
 
         result = user.to_dict()
         notebook_count = self.session.query(Notebook).filter_by(user=user, parent_id=None).count()
+        note_count = self.session.query(Note).filter_by(user_id=user.id).count()
         star_count = self.session.query(Star).filter(
             Star.user_id == user.id,
             or_(
@@ -112,6 +113,7 @@ class ProfileHandler(BaseRequestHandler):
             ).count()
             result["followed"] = True if followed else False
         result["notebook_count"] = notebook_count
+        result["note_count"] = note_count
         result["star_count"] = star_count
         result["follower_count"] = follower_count
         result["following_count"] = following_count
