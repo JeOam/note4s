@@ -74,3 +74,9 @@ class NoteTestCase(BaseHTTPTestCase):
         assert star
         assert star.target_id == self.note.id
         assert star.user_id == self.another_user.id
+
+        result = self.get('/api/user/star/',
+                          params={'username': self.another_user.username},
+                          headers={'Authorization': self.another_token})
+        assert result["code"] == 200
+        assert result["data"][0]["id"]

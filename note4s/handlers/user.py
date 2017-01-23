@@ -170,6 +170,30 @@ class Unfollowandler(BaseRequestHandler):
         self.api_success_response(True)
 
 
+class StarHandler(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        username = self.get_argument("username", None)
+        if not username:
+            self.api_fail_response(f'username cannot be empty.')
+            return
+        user = self.session.query(User).filter(User.username == username).first()
+        if not user:
+            self.api_fail_response(f'User {username} does not exist.')
+            return
+        note_ids = self.session.query(Star.target_id).filter(
+            Star.target_type == N_TARGET_TYPE[1],
+            Star.user_id == user.id
+        ).all()
+        note_ids = [item[0] for item in note_ids]
+        notes = self.session.query(Note).filter(
+            Note.id.in_(note_ids)
+        ).all()
+        # TODO make sure notes is in order by note_ids
+        notes = sorted(notes, key=lambda o: note_ids.index(o.id))
+        result = [note.to_dict() for note in notes]
+        self.api_success_response(result)
+
+
 class NotificationHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
         user_notifications = self.session.query(

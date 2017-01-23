@@ -10,6 +10,7 @@ from note4s.handlers import \
     CheckHandler, MentionHandler, ProfileHandler, \
     NoteHandler, SubNoteHandler, \
     WatchNoteHandler, StarNoteHandler, \
+    StarHandler, \
     NotebooksHandler, NotebookHandler, \
     NoteCommentHandler, StarCommentHandler, \
     NotificationHandler, ContributionHandler, \
@@ -26,6 +27,7 @@ api_handlers = [
     (r'/api/user/contribution/', ContributionHandler),
     (r'/api/user/follow/', FollowHandler),
     (r'/api/user/unfollow/', Unfollowandler),
+    (r'/api/user/star/', StarHandler),
     (r'/api/note/', NoteHandler),
     (r'/api/subnote/', SubNoteHandler),
     (r'/api/note/(?P<note_id>[0-9a-f]{32}\Z)?', NoteHandler),

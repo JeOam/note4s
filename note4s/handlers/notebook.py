@@ -47,6 +47,15 @@ class NotebooksHandler(BaseRequestHandler):
                     note["type"] = "note"
                 section["children"] = notes
                 notebook["children"].append(section)
+        empty_notebook_notes = self.session.query(Note).filter(
+            Note.notebook_id.is_(None),
+            Note.parent_id.is_(None)
+        ).all()
+        if len(empty_notebook_notes):
+            result.append({
+                "name": "unassign",
+                "children": [note.to_dict() for note in empty_notebook_notes]
+            })
         self.api_success_response(result)
 
     def post(self, *args, **kwargs):
@@ -118,6 +127,15 @@ class NotebookHandler(BaseRequestHandler):
         if not notebook:
             self.api_fail_response(f'Notebook {notebook_id} does not exist.')
             return
+        section_notes = self.session.query(Note).filter(Note.section_id == notebook_id).all()
+        for note in section_notes:
+            note.section_id = None
+            self.session.add(note)
+        notebook_notes = self.session.query(Note).filter(Note.notebook_id == notebook_id).all()
+        for note in notebook_notes:
+            note.notebook_id = None
+            note.section_id = None
+            self.session.add(note)
         self.session.delete(notebook)
         self.session.commit()
         self.api_success_response(notebook.to_dict())
