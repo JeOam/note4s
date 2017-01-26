@@ -12,6 +12,7 @@ from note4s.models import User, Watch, N_TARGET_TYPE, \
     UserNotification, Notification, N_ACTION, \
     Note, Notebook, Star
 from note4s.utils import create_jwt
+from note4s.service.notify import notify_user_follow
 from .base import BaseRequestHandler
 
 
@@ -146,6 +147,7 @@ class FollowHandler(BaseRequestHandler):
                       user_id=self.current_user.id)
         self.session.add(watch)
         self.session.commit()
+        notify_user_follow(user_id=user.id, sender_id=self.current_user.id, session=self.session)
         self.api_success_response(True)
 
 
@@ -194,6 +196,46 @@ class StarHandler(BaseRequestHandler):
         self.api_success_response(result)
 
 
+class FollowerHandler(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        username = self.get_argument("username", None)
+        if not username:
+            self.api_fail_response(f'username cannot be empty.')
+            return
+        user = self.session.query(User).filter(User.username == username).first()
+        if not user:
+            self.api_fail_response(f'User {username} does not exist.')
+            return
+        watch_ids = self.session.query(Watch.user_id).filter(
+            Watch.target_id == user.id,
+            Watch.target_type == N_TARGET_TYPE[0]
+        ).all()
+        watch_ids = [item[0] for item in watch_ids]
+        users = self.session.query(User).filter(User.id.in_(watch_ids)).all()
+        result = [user.to_dict() for user in users]
+        self.api_success_response(result)
+
+
+class FollowingHandler(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        username = self.get_argument("username", None)
+        if not username:
+            self.api_fail_response(f'username cannot be empty.')
+            return
+        user = self.session.query(User).filter(User.username == username).first()
+        if not user:
+            self.api_fail_response(f'User {username} does not exist.')
+            return
+        watch_ids = self.session.query(Watch.user_id).filter(
+            Watch.user_id == user.id,
+            Watch.target_type == N_TARGET_TYPE[0]
+        ).all()
+        watch_ids = [item[0] for item in watch_ids]
+        users = self.session.query(User).filter(User.id.in_(watch_ids)).all()
+        result = [user.to_dict() for user in users]
+        self.api_success_response(result)
+
+
 class NotificationHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
         user_notifications = self.session.query(
@@ -221,11 +263,10 @@ class NotificationHandler(BaseRequestHandler):
             info["anchor"] = notification.anchor.hex if notification.anchor else ""
             sender = self.session.query(User).filter_by(id=notification.sender_id).one()
             info["sender_name"] = sender.username
-            if (notification.action is N_ACTION[3]
-                and notification.target_type is not N_TARGET_TYPE[0]) \
-                    or notification.action is N_ACTION[4]:
+            if (notification.action is N_ACTION[3] or notification.action is N_ACTION[4]) \
+               and notification.target_type is not N_TARGET_TYPE[0]:
                 stars.append(info)
-            elif (notification.action is N_ACTION[3]
+            elif (notification.action is N_ACTION[4]
                   and notification.target_type is N_TARGET_TYPE[0]):
                 follows.append(info)
             else:

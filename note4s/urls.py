@@ -14,7 +14,8 @@ from note4s.handlers import \
     NotebooksHandler, NotebookHandler, \
     NoteCommentHandler, StarCommentHandler, \
     NotificationHandler, ContributionHandler, \
-    GithubCallbackHandler
+    GithubCallbackHandler, FollowerHandler, \
+    FollowingHandler
 
 api_handlers = [
     (r'/auth/github/', GithubCallbackHandler),
@@ -28,6 +29,8 @@ api_handlers = [
     (r'/api/user/follow/', FollowHandler),
     (r'/api/user/unfollow/', Unfollowandler),
     (r'/api/user/star/', StarHandler),
+    (r'/api/user/follower/', FollowerHandler),
+    (r'/api/user/following/', FollowingHandler),
     (r'/api/note/', NoteHandler),
     (r'/api/subnote/', SubNoteHandler),
     (r'/api/note/(?P<note_id>[0-9a-f]{32}\Z)?', NoteHandler),

@@ -6,7 +6,7 @@
 """
 from datetime import datetime
 import pytest
-from note4s.models import Watch, N_TARGET_TYPE
+from note4s.models import Watch, N_TARGET_TYPE, Notification
 from .base import BaseHTTPTestCase
 from .conftest import session
 
@@ -51,6 +51,12 @@ class UserTestCase(BaseHTTPTestCase):
             user_id=self.another_user.id
         ).count()
         assert watch == 1
+        notification = session.query(Notification).filter_by(
+            target_id=self.user.id,
+            target_type=N_TARGET_TYPE[0],
+            sender_id=self.another_user.id
+        ).one()
+        assert notification
         result = self.post(
             '/api/user/unfollow/',
             body={"username": self.user.username},

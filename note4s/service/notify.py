@@ -149,39 +149,18 @@ def notify_comment_mention(note_id, note_title, comment_id, mentions, sender_id,
         session.commit()
 
 
-def create_remind(target_id, target_type, action, sender_id, session):
-    notification = Notification(target_id=target_id,
-                                target_type=target_type,
-                                action=action,
-                                type=N_TYPE[0])
+def notify_user_follow(user_id, sender_id, session):
+    notification = Notification(
+        type=N_TYPE[0],
+        target_id=user_id,
+        target_type=N_TARGET_TYPE[0],
+        action=N_ACTION[4],
+        sender_id=sender_id
+    )
+    user_notification = UserNotification(
+        user_id=user_id,
+        notification_id=notification.id
+    )
     session.add(notification)
+    session.add(user_notification)
     session.commit()
-
-
-def create_announce(content, sender_id, session):
-    notification = Notification(content=content,
-                                type=N_TYPE[1],
-                                sender_id=sender_id)
-
-    session.add(notification)
-    session.commit()
-
-
-def create_message(content, target_id, sender_id, session):
-    notification = Notification(content=content,
-                                target_id=target_id,
-                                sender_id=sender_id,
-                                type=N_TYPE[2])
-    user_noficiation = UserNotification(user_id=target_id,
-                                        notification_id=notification.id)
-    session.add(notification)
-    session.add(user_noficiation)
-    session.commit()
-
-
-def pull_notifications(user_id):
-    pass
-
-
-def read(user_id, notification_id):
-    pass
