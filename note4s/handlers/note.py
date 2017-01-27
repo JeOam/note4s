@@ -7,7 +7,8 @@
 from sqlalchemy import or_, asc
 from .base import BaseRequestHandler
 from note4s.models import Note, Notebook, Watch, Star, N_TARGET_TYPE, Comment
-from note4s.service.notify import notify_new_note, notify_note_star, notify_note_watch
+from note4s.service.notify import notify_new_note, notify_note_star, \
+    notify_note_watch, notify_new_subnote
 
 
 class NoteHandler(BaseRequestHandler):
@@ -145,12 +146,11 @@ class SubNoteHandler(BaseRequestHandler):
                     content=content,
                     parent_id=parent_id)
         self.session.add(note)
-        try:
-            self.session.commit()
-        except Exception as e:
-            self.api_fail_response(f'Faied to create sub note: {e}')
-        else:
-            self.api_success_response(note.to_dict())
+        notify_new_subnote(note_owner_id=self.current_user.id,
+                           note_id=parent_id,
+                           session=self.session)
+        self.session.commit()
+        self.api_success_response(note.to_dict())
 
 
 class WatchNoteHandler(BaseRequestHandler):

@@ -5,7 +5,7 @@
     ~~~~~~~
 """
 import pytest
-from note4s.models import Watch, Star
+from note4s.models import Watch, Star, Notification
 from .base import BaseHTTPTestCase
 from .conftest import session
 
@@ -53,16 +53,30 @@ class NoteTestCase(BaseHTTPTestCase):
         assert result['data']['is_star'] is False
         assert result['data']['star_count'] == 0
 
-    @pytest.mark.usefixtures("note", "another_user", "another_token")
+    @pytest.mark.usefixtures("note", "another_user", "another_token", "token")
     def test_watch_note(self):
         result = self.post(f'/api/note/watch/{self.note.id.hex}', body={}, headers={'Authorization': self.another_token})
         assert isinstance(result, dict)
         assert result["code"] == 200
         assert result["data"] == 1
-        watch = session.query(Watch).first()
+        watch = session.query(Watch).filter_by(
+            target_id=self.note.id,
+            target_type="note",
+            user_id=self.another_user.id
+        ).one()
         assert watch
-        assert watch.target_id == self.note.id
-        assert watch.user_id == self.another_user.id
+        session.commit()
+
+        result = self.post('/api/subnote/',
+                           body={'content': 'test sub note',
+                                 'parent_id': self.note.id.hex},
+                           headers={'Authorization': self.token})
+        assert isinstance(result, dict)
+        assert result["code"] == 200
+        session.commit()
+        notification = session.query(Notification).filter_by(target_id=self.note.id, action="new subnote").one()
+        assert notification
+
 
     @pytest.mark.usefixtures("note", "another_user", "another_token")
     def test_star_note(self):
