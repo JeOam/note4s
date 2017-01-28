@@ -44,7 +44,7 @@ def notify_new_note(note_owner_id, note_id, note_title, session):
     session.commit()
 
 
-def notify_new_subnote(note_owner_id, note_id, session):
+def notify_new_subnote(note_owner_id, note_id, subnote_id, session):
     watches = session.query(Watch).filter_by(
         target_id=note_id,
         target_type=N_TARGET_TYPE[1],
@@ -58,7 +58,8 @@ def notify_new_subnote(note_owner_id, note_id, session):
         target_type=N_TARGET_TYPE[1],
         target_desc=note.title,
         action=N_ACTION[1],
-        sender_id=note_owner_id
+        sender_id=note_owner_id,
+        anchor=subnote_id
     )
     session.add(notification)
     for watch in watches:

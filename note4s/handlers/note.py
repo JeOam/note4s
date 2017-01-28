@@ -148,6 +148,7 @@ class SubNoteHandler(BaseRequestHandler):
         self.session.add(note)
         notify_new_subnote(note_owner_id=self.current_user.id,
                            note_id=parent_id,
+                           subnote_id=note.id,
                            session=self.session)
         self.session.commit()
         self.api_success_response(note.to_dict())
