@@ -100,11 +100,13 @@ class ProfileHandler(BaseRequestHandler):
         ).count()
         follower_count = self.session.query(Watch).filter(
             Watch.target_id == user.id,
-            Watch.target_type == N_TARGET_TYPE[0]
+            Watch.target_type == N_TARGET_TYPE[0],
+            Watch.user_id != user.id
         ).count()
         following_count = self.session.query(Watch).filter(
-            Watch.user_id == user.id,
+            Watch.target_id != user.id,
             Watch.target_type == N_TARGET_TYPE[0],
+            Watch.user_id == user.id,
         ).count()
         if username and self.current_user.username != username:
             followed = self.session.query(Watch).filter(
@@ -226,9 +228,10 @@ class FollowingHandler(BaseRequestHandler):
         if not user:
             self.api_fail_response(f'User {username} does not exist.')
             return
-        watch_ids = self.session.query(Watch.user_id).filter(
+        watch_ids = self.session.query(Watch.target_id).filter(
+            Watch.target_id != user.id,
+            Watch.target_type == N_TARGET_TYPE[0],
             Watch.user_id == user.id,
-            Watch.target_type == N_TARGET_TYPE[0]
         ).all()
         watch_ids = [item[0] for item in watch_ids]
         users = self.session.query(User).filter(User.id.in_(watch_ids)).all()
