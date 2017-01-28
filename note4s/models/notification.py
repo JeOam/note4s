@@ -13,7 +13,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import ENUM, UUID
 from .base import BaseModel
 
-ACTION = ('new note', 'new subnote', 'comment', 'star', 'watch', 'at', 'reply')
+ACTION = ('new note', 'new subnote', 'comment', 'star', 'watch', 'at', 'reply', 'new notebook')
 TARGET_TYPE = ('user', 'note', 'subnote', 'notebook', 'comment')
 TYPE = ('remind', 'announce', 'message')
 ACTION_ENUM = ENUM(*ACTION, name='action')
@@ -35,13 +35,6 @@ class UserNotification(BaseModel):
     is_read = Column(Boolean, default=False)
     user_id = Column(UUID(as_uuid=True))
     notification_id = Column(UUID(as_uuid=True))
-
-
-class Subscription(BaseModel):
-    target_id = Column(UUID(as_uuid=True))
-    target_type = Column(TARGET_TYPE_ENUM)
-    action = Column(ACTION_ENUM)
-    user_id = Column(UUID(as_uuid=True))
 
 
 class Watch(BaseModel):

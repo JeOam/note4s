@@ -5,7 +5,7 @@
     ~~~~~~~
 """
 import pytest
-from note4s.models import Watch, Star, Notification
+from note4s.models import Watch, Star, Activity
 from .base import BaseHTTPTestCase
 from .conftest import session
 
@@ -13,17 +13,19 @@ class NoteTestCase(BaseHTTPTestCase):
     def test_create_note_without_token(self):
         data = {
             'title': 'test title',
-            'content': 'test content'
+            'content': 'test content',
         }
         result = self.post('/api/note/', body=data)
         assert isinstance(result, dict)
         assert result["code"] == 401
 
-    @pytest.mark.usefixtures("token")
+    @pytest.mark.usefixtures("token", "note")
     def test_create_note(self):
         data = {
             'title': 'test title',
-            'content': 'test content'
+            'content': 'test content',
+            "section_id": self.note.section_id.hex,
+            "notebook_id": self.note.notebook_id.hex
         }
         result = self.post('/api/note/', body=data, headers={'Authorization': self.token})
         assert isinstance(result, dict)
@@ -74,8 +76,8 @@ class NoteTestCase(BaseHTTPTestCase):
         assert isinstance(result, dict)
         assert result["code"] == 200
         session.commit()
-        notification = session.query(Notification).filter_by(target_id=self.note.id, action="new subnote").one()
-        assert notification
+        activity = session.query(Activity).filter_by(target_id=self.note.id, action="new subnote").one()
+        assert activity
 
 
     @pytest.mark.usefixtures("note", "another_user", "another_token")

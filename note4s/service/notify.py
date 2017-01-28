@@ -7,69 +7,14 @@
     1. 评论了你的 Note
     2. 回复了你的评论
     3. @ 你 了
-    4. 私信你了
     5. Star 了你的 Note
     6. Watch 了你的 Note
-    7. 发了站内消息
+    7. 关注了你
 """
 from note4s.models import (
     Notification, N_TYPE, N_TARGET_TYPE, N_ACTION,
-    UserNotification,
-    Watch, User, Note
+    UserNotification, User
 )
-
-
-def notify_new_note(note_owner_id, note_id, note_title, session):
-    watches = session.query(Watch).filter_by(
-        target_id=note_owner_id,
-        target_type=N_TARGET_TYPE[0],
-    ).all()
-    if not len(watches):
-        return
-    notification = Notification(
-        type=N_TYPE[0],
-        target_id=note_id,
-        target_type=N_TARGET_TYPE[1],
-        target_desc=note_title,
-        action=N_ACTION[0],
-        sender_id=note_owner_id
-    )
-    session.add(notification)
-    for watch in watches:
-        user_notification = UserNotification(
-            user_id=watch.user_id,
-            notification_id=notification.id
-        )
-        session.add(user_notification)
-    session.commit()
-
-
-def notify_new_subnote(note_owner_id, note_id, subnote_id, session):
-    watches = session.query(Watch).filter_by(
-        target_id=note_id,
-        target_type=N_TARGET_TYPE[1],
-    ).all()
-    if not len(watches):
-        return
-    note = session.query(Note).filter_by(id=note_id).one()
-    notification = Notification(
-        type=N_TYPE[0],
-        target_id=note_id,
-        target_type=N_TARGET_TYPE[1],
-        target_desc=note.title,
-        action=N_ACTION[1],
-        sender_id=note_owner_id,
-        anchor=subnote_id
-    )
-    session.add(notification)
-    for watch in watches:
-        user_notification = UserNotification(
-            user_id=watch.user_id,
-            notification_id=notification.id
-        )
-        session.add(user_notification)
-    session.commit()
-
 
 
 def notify_note_star(note_owner_id, note_id, note_title, sender_id, session):

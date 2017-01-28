@@ -6,7 +6,7 @@
 """
 from datetime import datetime
 import pytest
-from note4s.models import Watch, N_TARGET_TYPE, Notification, UserNotification
+from note4s.models import Watch, N_TARGET_TYPE, Notification, UserNotification, Activity
 from .base import BaseHTTPTestCase
 from .conftest import session
 
@@ -36,7 +36,7 @@ class UserTestCase(BaseHTTPTestCase):
         assert result["data"]["email"] == data["email"]
         assert not result["data"].get("password")
 
-    @pytest.mark.usefixtures("user", "token", "another_user", "another_token")
+    @pytest.mark.usefixtures("note", "user", "token", "another_user", "another_token")
     def test_follow_user(self):
         result = self.post(
             '/api/user/follow/',
@@ -60,21 +60,18 @@ class UserTestCase(BaseHTTPTestCase):
 
         data = {
             'title': 'test title',
-            'content': 'test content'
+            'content': 'test content',
+            "section_id": self.note.section_id.hex,
+            "notebook_id": self.note.notebook_id.hex
         }
         result = self.post('/api/note/', body=data, headers={'Authorization': self.token})
         assert result["code"] == 200
-        notification = session.query(Notification).filter_by(
+        activity = session.query(Activity).filter_by(
             target_id=result["data"]["id"],
             target_type=N_TARGET_TYPE[1],
-            sender_id=self.user.id
+            user_id=self.user.id
         ).one()
-        assert notification
-        user_notification = session.query(UserNotification).filter_by(
-            notification_id=notification.id,
-            user_id=self.another_user.id
-        ).one()
-        assert user_notification
+        assert activity
 
         result = self.post(
             '/api/user/unfollow/',

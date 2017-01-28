@@ -7,8 +7,8 @@
 from sqlalchemy import or_, asc
 from .base import BaseRequestHandler
 from note4s.models import Note, Notebook, Watch, Star, N_TARGET_TYPE, Comment
-from note4s.service.notify import notify_new_note, notify_note_star, \
-    notify_note_watch, notify_new_subnote
+from note4s.service.notify import notify_note_star, notify_note_watch
+from note4s.service.feed import feed_new_note, feed_new_subnote
 
 
 class NoteHandler(BaseRequestHandler):
@@ -85,6 +85,10 @@ class NoteHandler(BaseRequestHandler):
         content = params.get("content")
         section_id = params.get('section_id')
         notebook_id = params.get('notebook_id')
+        if not notebook_id or not section_id:
+            self.api_fail_response(f'Notebook or Section is required.')
+            return
+
         note = Note(user=self.current_user,
                     title=title,
                     content=content,
@@ -97,7 +101,11 @@ class NoteHandler(BaseRequestHandler):
         self.session.add(note)
         self.session.add(notebook)
         self.session.commit()
-        notify_new_note(self.current_user.id, note.id, note.title, self.session)
+        feed_new_note(user_id=self.current_user.id,
+                      note_id=note.id,
+                      note_title=note.title,
+                      notebook_id=notebook_id,
+                      session=self.session)
         self.api_success_response(note.to_dict())
 
     def put(self, note_id):
@@ -146,11 +154,11 @@ class SubNoteHandler(BaseRequestHandler):
                     content=content,
                     parent_id=parent_id)
         self.session.add(note)
-        notify_new_subnote(note_owner_id=self.current_user.id,
-                           note_id=parent_id,
-                           subnote_id=note.id,
-                           session=self.session)
         self.session.commit()
+        feed_new_subnote(user_id=self.current_user.id,
+                         note_id=parent_id,
+                         subnote_id=note.id,
+                         session=self.session)
         self.api_success_response(note.to_dict())
 
 
