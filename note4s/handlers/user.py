@@ -10,7 +10,7 @@ from sqlalchemy.orm import exc
 from sqlalchemy import func, desc, or_
 from note4s.models import User, Watch, N_TARGET_TYPE, \
     UserNotification, Notification, N_ACTION, \
-    Note, Notebook, Star
+    Note, Notebook, Star, Activity
 from note4s.utils import create_jwt
 from note4s.service.notify import notify_user_follow
 from .base import BaseRequestHandler
@@ -267,7 +267,7 @@ class NotificationHandler(BaseRequestHandler):
             sender = self.session.query(User).filter_by(id=notification.sender_id).one()
             info["sender_name"] = sender.username
             if (notification.action is N_ACTION[3] or notification.action is N_ACTION[4]) \
-               and notification.target_type is not N_TARGET_TYPE[0]:
+                    and notification.target_type is not N_TARGET_TYPE[0]:
                 stars.append(info)
             elif (notification.action is N_ACTION[4]
                   and notification.target_type is N_TARGET_TYPE[0]):
@@ -326,3 +326,35 @@ class ContributionHandler(BaseRequestHandler):
                    f'{str(int(query_result[1])).zfill(2)}-'
                    f'{str(int(query_result[2])).zfill(2)}'] = query_result[3]
         self.api_success_response(result)
+
+
+class ActivityHandler(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        username = self.get_argument("username", None)
+        if username:
+            user = self.session.query(User).filter_by(username=username).first()
+            if not user:
+                self.api_fail_response(f'User {username} does not exist.')
+                return
+            activities = self.session.query(Activity).filter_by(user_id=user.id).all()
+            result = [activity.to_dict() for activity in activities]
+            self.api_success_response(result)
+        else:
+            user = self.current_user
+            watches = self.session.query(Watch.target_id).filter(
+                Watch.target_id != user.id,
+                Watch.target_type == N_TARGET_TYPE[0],
+                Watch.user_id == user.id,
+            ).all()
+            watch_ids = [watch[0] for watch in watches]
+            watch_ids.append(user.id)
+            activities = self.session.query(Activity).filter(
+                Activity.user_id.in_(watch_ids)
+            ).all()
+            user_ids = [activity.user_id for activity in activities]
+            users = self.session.query(User).filter(User.id.in_(user_ids)).all()
+            users_info = {user.id.hex: user for user in users}
+            result = [activity.to_dict() for activity in activities]
+            for activity in result:
+                activity["user"] = users_info[activity["user_id"]].to_dict()
+            self.api_success_response(result)

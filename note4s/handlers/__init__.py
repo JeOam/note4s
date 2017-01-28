@@ -9,7 +9,8 @@ from .user import LoginHandler, RegisterHandler, \
     ProfileHandler, FollowHandler, Unfollowandler, \
     NotificationHandler, ContributionHandler, \
     StarHandler, \
-    FollowerHandler, FollowingHandler
+    FollowerHandler, FollowingHandler, \
+    ActivityHandler
 from .note import NoteHandler, SubNoteHandler, \
     WatchNoteHandler, StarNoteHandler
 from .notebook import NotebooksHandler, NotebookHandler

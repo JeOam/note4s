@@ -32,6 +32,13 @@ class NoteTestCase(BaseHTTPTestCase):
         assert result["code"] == 200
         assert len(result["data"]["id"]) == 32
 
+        result = self.get('/api/user/activity/', headers={'Authorization': self.token})
+        assert isinstance(result, dict)
+        assert result["code"] == 200
+        assert len(result["data"]) == 1
+        assert result["data"][0]["target_type"] == "note"
+        assert result["data"][0]["user"]
+
     def test_note_detail_url(self):
         result = self.get('/api/note/123')
         assert result == '<html><title>404: Not Found</title><body>404: Not Found</body></html>'
