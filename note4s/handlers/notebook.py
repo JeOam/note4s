@@ -127,7 +127,7 @@ class NotebookHandler(BaseRequestHandler):
         if not notebook:
             self.api_fail_response(f'Notebook {notebook_id} does not exist.')
             return
-        children_notebooks = self.session.query(Notebook.parent_id == notebook_id).count()
+        children_notebooks = self.session.query(Notebook).filter_by(parent_id=notebook_id).count()
         if children_notebooks:
             self.api_fail_response('Notebook cannot be deleted because of nonempty')
             return
