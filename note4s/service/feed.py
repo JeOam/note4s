@@ -20,6 +20,7 @@ def feed_new_note(user_id, note_id, note_title, notebook_id, session):
         target_owner_id=notebook_id,
         target_owner_type=N_TARGET_TYPE[3],
         target_owner_desc=notebook.name,
+        action=N_ACTION[0],
         user_id=user_id
     )
     session.add(activity)
