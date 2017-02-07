@@ -167,7 +167,9 @@ class SubNoteHandler(BaseRequestHandler):
                          note_id=parent_id,
                          subnote_id=note.id,
                          session=self.session)
-        self.api_success_response(note.to_dict())
+        result = note.to_dict()
+        result["user"] = self.current_user.to_dict(["username", "avatar", "nickname"])
+        self.api_success_response(result)
 
 
 class WatchNoteHandler(BaseRequestHandler):
