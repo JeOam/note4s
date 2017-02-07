@@ -90,7 +90,10 @@ class ProfileHandler(BaseRequestHandler):
 
         result = user.to_dict()
         notebook_count = self.session.query(Notebook).filter_by(user=user, parent_id=None).count()
-        note_count = self.session.query(Note).filter_by(user_id=user.id).count()
+        note_count = self.session.query(Note).filter(
+            Note.user_id == user.id,
+            Note.parent_id.is_(None)
+        ).count()
         star_count = self.session.query(Star).filter(
             Star.user_id == user.id,
             or_(
