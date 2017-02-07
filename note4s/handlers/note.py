@@ -6,7 +6,7 @@
 """
 from sqlalchemy import or_, asc
 from .base import BaseRequestHandler
-from note4s.models import Note, Notebook, Watch, Star, N_TARGET_TYPE, Comment
+from note4s.models import Note, Notebook, Watch, Star, N_TARGET_TYPE, Comment, User
 from note4s.service.notify import notify_note_star, notify_note_watch
 from note4s.service.feed import feed_new_note, feed_new_subnote
 
@@ -23,11 +23,19 @@ class NoteHandler(BaseRequestHandler):
         else:
             result = {}
             subnotes = []
+            user_ids = [note.user_id for note in notes]
+            users = self.session.query(User).filter(User.id.in_(user_ids)).all()
+            userinfo = {}
+            for user in users:
+                userinfo[user.id] = user.to_dict(["username", "avatar", "nickname"])
             for note in notes:
                 if note.id.hex == note_id:
                     result = note.to_dict()
+                    result["user"] = userinfo[note.user_id]
                 else:
-                    subnotes.append(note.to_dict())
+                    subnote = note.to_dict()
+                    subnote["user"] = userinfo[note.user_id]
+                    subnotes.append(subnote)
             if result.get('id') is None:
                 self.api_fail_response(f'Note {note_id} does not exist.')
                 return

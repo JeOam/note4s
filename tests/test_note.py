@@ -9,6 +9,7 @@ from note4s.models import Watch, Star, Activity
 from .base import BaseHTTPTestCase
 from .conftest import session
 
+
 class NoteTestCase(BaseHTTPTestCase):
     def test_create_note_without_token(self):
         data = {
@@ -61,10 +62,30 @@ class NoteTestCase(BaseHTTPTestCase):
         assert result['data']['watch_count'] == 0
         assert result['data']['is_star'] is False
         assert result['data']['star_count'] == 0
+        assert result['data']['user']
+        assert result['data']['user']['username']
+        assert result['data']['user']['avatar']
+
+    @pytest.mark.usefixtures("note", "token")
+    def test_subnote_detail(self):
+        result = self.post('/api/subnote/',
+                           body={'content': 'test sub note',
+                                 'parent_id': self.note.id.hex},
+                           headers={'Authorization': self.token})
+        assert isinstance(result, dict)
+        assert result["code"] == 200
+        result = self.get(f'/api/note/{self.note.id.hex}', headers={'Authorization': self.token})
+        assert len(result['data']['subnotes']) == 1
+        subnote = result['data']['subnotes'][0]
+        assert subnote["user"]
+        assert subnote["user"]['username']
+        assert subnote["user"]['avatar']
+        assert subnote["content"]
 
     @pytest.mark.usefixtures("note", "another_user", "another_token", "token")
     def test_watch_note(self):
-        result = self.post(f'/api/note/watch/{self.note.id.hex}', body={}, headers={'Authorization': self.another_token})
+        result = self.post(f'/api/note/watch/{self.note.id.hex}', body={},
+                           headers={'Authorization': self.another_token})
         assert isinstance(result, dict)
         assert result["code"] == 200
         assert result["data"] == 1
@@ -85,7 +106,6 @@ class NoteTestCase(BaseHTTPTestCase):
         session.commit()
         activity = session.query(Activity).filter_by(target_id=self.note.id, action="new subnote").one()
         assert activity
-
 
     @pytest.mark.usefixtures("note", "another_user", "another_token")
     def test_star_note(self):

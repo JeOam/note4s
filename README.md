@@ -37,12 +37,15 @@ alembic revision --autogenerate -m "change log"
 alembic upgrade head
 ```
 
-Timeline 系统：
-个人 timeline
-团队 timeline
-关注的人 timeline
-缓存与分页
+权限控制：
+  * 团队管理
+  * 私密与公开
 
-通知系统：
-个人通知
-团队通知
+资料导出：
+  * Notebook 导出成 PDF
+  * Notebook 导出到 GitHub Pages
+
+基础增强：
+  * Note Git Diff
+  * 文件存储 - 文件保存至 Git 文件夹内
+  * 内容搜索 - Elasticsearch
