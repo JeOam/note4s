@@ -13,6 +13,7 @@ from note4s.models import User, Watch, N_TARGET_TYPE, \
     Note, Notebook, Star, Activity
 from note4s.utils import create_jwt
 from note4s.service.notify import notify_user_follow
+from note4s.service.feed import feed_follow_user
 from .base import BaseRequestHandler
 
 
@@ -153,6 +154,7 @@ class FollowHandler(BaseRequestHandler):
         self.session.add(watch)
         self.session.commit()
         notify_user_follow(user_id=user.id, sender_id=self.current_user.id, session=self.session)
+        feed_follow_user(user_id=self.current_user.id, target_id=user.id, session=self.session)
         self.api_success_response(True)
 
 

@@ -87,7 +87,7 @@ class NotebookHandler(BaseRequestHandler):
             return
         notebook_count = self.session.query(Notebook).filter_by(user=user, parent_id=None).count()
         note_count = self.session.query(Note).filter(
-            Note.user_id==user.id,
+            Note.user_id == user.id,
             Note.parent_id.is_(None)
         ).count()
         following_count = self.session.query(Watch).filter_by(

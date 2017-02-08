@@ -8,7 +8,7 @@ from sqlalchemy import or_, asc
 from .base import BaseRequestHandler
 from note4s.models import Note, Notebook, Watch, Star, N_TARGET_TYPE, Comment, User
 from note4s.service.notify import notify_note_star, notify_note_watch
-from note4s.service.feed import feed_new_note, feed_new_subnote
+from note4s.service.feed import feed_new_note, feed_new_subnote, feed_star_note
 
 
 class NoteHandler(BaseRequestHandler):
@@ -254,6 +254,13 @@ class StarNoteHandler(BaseRequestHandler):
                 sender_id=self.current_user.id,
                 session=self.session
             )
+        feed_star_note(
+            user_id=self.current_user.id,
+            note_id=note.id,
+            note_title=note.title,
+            notebook_id=note.notebook_id,
+            session=self.session
+        )
         self.api_success_response(star_count + 1)
 
     def delete(self, note_id):
