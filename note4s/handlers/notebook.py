@@ -4,10 +4,9 @@
     notebook.py
     ~~~~~~~
 """
-from sqlalchemy.orm import exc
 from .base import BaseRequestHandler
 from note4s.models import Notebook, User, Watch, N_TARGET_TYPE, Note
-
+from note4s.service.feed import feed_new_notebook
 
 class NotebooksHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
@@ -66,13 +65,14 @@ class NotebooksHandler(BaseRequestHandler):
                             name=name,
                             parent_id=parent_id)
         self.session.add(notebook)
-        try:
-            self.session.commit()
-        except Exception as e:
-            self.session.rollback()
-            self.api_fail_response("Failed to create notebook.")
-        else:
-            self.api_success_response(notebook.to_dict())
+        self.session.commit()
+        if not parent_id:
+            feed_new_notebook(
+                user_id=self.current_user.id,
+                notebook_id=notebook.id,
+                session=self.session
+            )
+        self.api_success_response(notebook.to_dict())
 
 
 class NotebookHandler(BaseRequestHandler):
@@ -86,7 +86,10 @@ class NotebookHandler(BaseRequestHandler):
             self.api_fail_response(f'Notebook {notebook_id} does not belong to any user.')
             return
         notebook_count = self.session.query(Notebook).filter_by(user=user, parent_id=None).count()
-        note_count = self.session.query(Note).filter_by(user_id=user.id).count()
+        note_count = self.session.query(Note).filter(
+            Note.user_id==user.id,
+            Note.parent_id.is_(None)
+        ).count()
         following_count = self.session.query(Watch).filter_by(
             target_type=N_TARGET_TYPE[0],
             user_id=user.id,

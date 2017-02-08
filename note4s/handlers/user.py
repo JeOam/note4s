@@ -339,7 +339,9 @@ class ActivityHandler(BaseRequestHandler):
             if not user:
                 self.api_fail_response(f'User {username} does not exist.')
                 return
-            activities = self.session.query(Activity).filter_by(user_id=user.id).all()
+            activities = self.session.query(Activity).filter_by(
+                user_id=user.id
+            ).order_by(desc(Activity.created)).all()
             result = [activity.to_dict() for activity in activities]
             self.api_success_response(result)
         else:
@@ -353,6 +355,8 @@ class ActivityHandler(BaseRequestHandler):
             watch_ids.append(user.id)
             activities = self.session.query(Activity).filter(
                 Activity.user_id.in_(watch_ids)
+            ).order_by(
+                desc(Activity.created)
             ).all()
             user_ids = [activity.user_id for activity in activities]
             users = self.session.query(User).filter(User.id.in_(user_ids)).all()
