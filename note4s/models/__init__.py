@@ -20,7 +20,11 @@ from .notification import (
 )
 from .activity import Activity
 from .comment import Comment
-
+from .organization import (
+    Organization,
+    Membership,
+    ROLE as O_ROLE
+)
 
 # Create all the tables in the database which are
 # defined by Base's subclasses such as User

@@ -43,6 +43,10 @@ class RegisterHandler(BaseRequestHandler):
         if (not email) or (not password) or (not username):
             self.api_fail_response("Not Enough Fields")
             return
+        user = self.session.query(User).filter_by(username=username).first()
+        if user:
+            self.api_fail_response("username is invalid.")
+            return
 
         user = User(username=username,
                     email=email,

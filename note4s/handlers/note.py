@@ -94,7 +94,7 @@ class NoteHandler(BaseRequestHandler):
         section_id = params.get('section_id')
         notebook_id = params.get('notebook_id')
         if not notebook_id or not section_id:
-            self.api_fail_response(f'Notebook or Section is required.')
+            self.api_fail_response('Notebook or Section is required.')
             return
 
         note = Note(user=self.current_user,

@@ -59,4 +59,4 @@ target/
 
 .vagrant/
 Vagrantfile
-./alembic/versions/
+alembic/versions/
