@@ -6,19 +6,19 @@
 """
 from sqlalchemy import (
     Column,
-    String,
-    ForeignKey
+    String
 )
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ENUM
 
 from .base import BaseModel
-from .user import User
+
+OWNER_TYPE = ('user', 'organization')
+OWNER_TYPE_ENUM = ENUM(*OWNER_TYPE, name='owner_type')
 
 
 class Notebook(BaseModel):
     name = Column(String(64))
     parent_id = Column(UUID(as_uuid=True))
     note_id = Column(UUID(as_uuid=True))
-    user_id = Column(UUID(as_uuid=True), ForeignKey('user.id'))
-    user = relationship(User, backref=backref("notebooks", cascade="all, delete-orphan"))
+    owner_id = Column(UUID(as_uuid=True))
+    owner_type = Column(OWNER_TYPE_ENUM)

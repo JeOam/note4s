@@ -97,6 +97,11 @@ class NoteHandler(BaseRequestHandler):
             self.api_fail_response('Notebook or Section is required.')
             return
 
+        notebook = self.session.query(Notebook).filter_by(id=notebook_id).first()
+        if not notebook:
+            self.api_fail_response('notebook_id is invalid.')
+            return
+
         note = Note(user=self.current_user,
                     title=title,
                     content=content,
@@ -104,8 +109,9 @@ class NoteHandler(BaseRequestHandler):
                     notebook_id=notebook_id)
         notebook = Notebook(name=title,
                             note_id=note.id,
-                            user=self.current_user,
-                            parent_id=section_id)
+                            parent_id=section_id,
+                            owner_id=notebook.owner_id,
+                            owner_type=notebook.owner_type)
         self.session.add(note)
         self.session.add(notebook)
         self.session.commit()

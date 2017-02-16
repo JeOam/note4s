@@ -10,7 +10,8 @@ from sqlalchemy.orm import exc
 from sqlalchemy import func, desc, or_
 from note4s.models import User, Watch, N_TARGET_TYPE, \
     UserNotification, Notification, N_ACTION, \
-    Note, Notebook, Star, Activity
+    Note, Notebook, OWNER_TYPE, Star, Activity, \
+    Organization, Membership
 from note4s.utils import create_jwt
 from note4s.service.notify import notify_user_follow
 from note4s.service.feed import feed_follow_user
@@ -94,7 +95,11 @@ class ProfileHandler(BaseRequestHandler):
             user = self.current_user
 
         result = user.to_dict()
-        notebook_count = self.session.query(Notebook).filter_by(user=user, parent_id=None).count()
+        notebook_count = self.session.query(Notebook).filter(
+            Notebook.owner_id == user.id,
+            Notebook.owner_type == OWNER_TYPE[0],
+            Notebook.parent_id.is_(None)
+        ).count()
         note_count = self.session.query(Note).filter(
             Note.user_id == user.id,
             Note.parent_id.is_(None)
@@ -128,6 +133,26 @@ class ProfileHandler(BaseRequestHandler):
         result["star_count"] = star_count
         result["follower_count"] = follower_count
         result["following_count"] = following_count
+
+        memberships = self.session.query(Membership).filter(
+            Membership.user_id == self.current_user.id
+        ).all()
+        if memberships:
+            organization_ids = [membership.organization_id for membership in memberships]
+            organizations = self.session.query(Organization).filter(
+                Organization.id.in_(organization_ids)
+            ).all()
+            organization_info = {}
+            for organization in organizations:
+                organization_info[organization.id] = organization.to_dict(['name', 'desc', 'avatar'])
+            organization_result = []
+            for membership in memberships:
+                organization = organization_info[membership.organization_id]
+                organization["roll"] = membership.role
+                organization_result.append(organization)
+            result["organizations"] = organization_result
+        else:
+            result["organizations"] = []
         self.api_success_response(result)
 
 
@@ -197,13 +222,16 @@ class StarHandler(BaseRequestHandler):
             Star.target_type == N_TARGET_TYPE[1],
             Star.user_id == user.id
         ).all()
-        note_ids = [item[0] for item in note_ids]
-        notes = self.session.query(Note).filter(
-            Note.id.in_(note_ids)
-        ).all()
-        # TODO make sure notes is in order by note_ids
-        notes = sorted(notes, key=lambda o: note_ids.index(o.id))
-        result = [note.to_dict() for note in notes]
+        if note_ids:
+            note_ids = [item[0] for item in note_ids]
+            notes = self.session.query(Note).filter(
+                Note.id.in_(note_ids)
+            ).all()
+            # TODO make sure notes is in order by note_ids
+            notes = sorted(notes, key=lambda o: note_ids.index(o.id))
+            result = [note.to_dict() for note in notes]
+        else:
+            result = []
         self.api_success_response(result)
 
 
@@ -222,8 +250,11 @@ class FollowerHandler(BaseRequestHandler):
             Watch.target_type == N_TARGET_TYPE[0]
         ).all()
         watch_ids = [item[0] for item in watch_ids]
-        users = self.session.query(User).filter(User.id.in_(watch_ids)).all()
-        result = [user.to_dict() for user in users]
+        if watch_ids:
+            users = self.session.query(User).filter(User.id.in_(watch_ids)).all()
+            result = [user.to_dict() for user in users]
+        else:
+            result = []
         self.api_success_response(result)
 
 
@@ -242,9 +273,12 @@ class FollowingHandler(BaseRequestHandler):
             Watch.target_type == N_TARGET_TYPE[0],
             Watch.user_id == user.id,
         ).all()
-        watch_ids = [item[0] for item in watch_ids]
-        users = self.session.query(User).filter(User.id.in_(watch_ids)).all()
-        result = [user.to_dict() for user in users]
+        if watch_ids:
+            watch_ids = [item[0] for item in watch_ids]
+            users = self.session.query(User).filter(User.id.in_(watch_ids)).all()
+            result = [user.to_dict() for user in users]
+        else:
+            result = []
         self.api_success_response(result)
 
 
@@ -364,6 +398,9 @@ class ActivityHandler(BaseRequestHandler):
             ).order_by(
                 desc(Activity.created)
             ).all()
+            if not activities:
+                self.api_success_response([])
+                return
             user_ids = [activity.user_id for activity in activities]
             users = self.session.query(User).filter(User.id.in_(user_ids)).all()
             users_info = {user.id.hex: user for user in users}

@@ -7,7 +7,7 @@
 import pytest
 from werkzeug.security import generate_password_hash
 from note4s.models import engine, BaseModel, Session, \
-    User, Note, Notebook
+    User, Note, Notebook, OWNER_TYPE
 from note4s.utils import create_jwt
 
 session = Session()
@@ -74,9 +74,11 @@ def another_token(another_user, request):
 
 @pytest.fixture(scope="function")
 def note_section(user, request):
-    notebook = Notebook(user=user,
+    notebook = Notebook(owner_id=user.id,
+                        owner_type=OWNER_TYPE[0],
                         name="test notebook")
-    note_section = Notebook(user=user,
+    note_section = Notebook(owner_id=user.id,
+                            owner_type=OWNER_TYPE[0],
                             name="test note section",
                             parent_id=notebook.id)
     session.add(notebook)
@@ -115,17 +117,22 @@ def notebooks(user, request):
     note = Note(user=user,
                 title="test title",
                 content="test content")
-    notebook1 = Notebook(user=user,
+    notebook1 = Notebook(owner_id=user.id,
+                         owner_type=OWNER_TYPE[0],
                          name="test notebook1")
-    notebook2 = Notebook(user=user,
+    notebook2 = Notebook(owner_id=user.id,
+                         owner_type=OWNER_TYPE[0],
                          name="test notebook2")
-    note_section1 = Notebook(user=user,
+    note_section1 = Notebook(owner_id=user.id,
+                             owner_type=OWNER_TYPE[0],
                              name="test note section 1",
                              parent_id=notebook1.id)
-    note_section2 = Notebook(user=user,
+    note_section2 = Notebook(owner_id=user.id,
+                             owner_type=OWNER_TYPE[0],
                              name="test note section 2",
                              parent_id=notebook2.id)
-    notebook_note = Notebook(user=user,
+    notebook_note = Notebook(owner_id=user.id,
+                             owner_type=OWNER_TYPE[0],
                              name=note.title,
                              note_id=note.id,
                              parent_id=note_section1.id)

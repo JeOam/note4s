@@ -49,11 +49,12 @@ class NotebookTestCase(BaseHTTPTestCase):
         assert notebook["name"] == "test notebook1"
         assert len(notebook["children"]) == 1
         assert len(notebook["children"][0]["children"]) == 1
-        assert notebook["user"]
-        user = notebook["user"]
-        assert user["note_count"] == 1
-        assert user["following_count"] == 0
-        assert user["follower_count"] == 0
+        assert notebook["owner"]
+        assert notebook["owner_type"] == "user"
+        owner = notebook["owner"]
+        assert owner["note_count"] == 1
+        assert owner["following_count"] == 0
+        assert owner["follower_count"] == 0
 
     @pytest.mark.usefixtures("token")
     def test_get_notebook_without_fixture(self):

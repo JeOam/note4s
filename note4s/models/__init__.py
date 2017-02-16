@@ -8,7 +8,7 @@ from .base import engine, Session, BaseModel
 
 from .user import User
 from .note import Note
-from .notebook import Notebook
+from .notebook import Notebook, OWNER_TYPE
 from .notification import (
     Notification,
     ACTION as N_ACTION,
