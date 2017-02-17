@@ -8,7 +8,8 @@ from sqlalchemy import or_, and_
 from .base import BaseRequestHandler
 from note4s.models import Notebook, OWNER_TYPE, User, Organization, \
     Watch, N_TARGET_TYPE, Note, Membership, O_ROLE
-from note4s.service.feed import feed_new_notebook
+from note4s.service.feed import feed_new_notebook, feed_notebook_watch
+from note4s.service.notify import notify_notebook_watch
 
 
 class NotebooksHandler(BaseRequestHandler):
@@ -147,6 +148,17 @@ class NotebookHandler(BaseRequestHandler):
         notebook_info = notebook.to_dict()
         notebook_info["owner"] = owner_info
         notebook_info["owner_type"] = notebook.owner_type
+        is_watch = self.session.query(Watch.id).filter(
+            Watch.target_id == notebook.id,
+            Watch.target_type == N_TARGET_TYPE[3],
+            Watch.user_id == self.current_user.id
+        ).count()
+        notebook_info["is_watch"] = True if is_watch else False
+        watch_count = self.session.query(Watch.id).filter(
+            Watch.target_id == notebook.id,
+            Watch.target_type == N_TARGET_TYPE[3],
+        ).count()
+        notebook_info["watch_count"] = watch_count
         sections = self.session.query(Notebook).filter(
             Notebook.parent_id == notebook.id
         ).all()
@@ -188,3 +200,59 @@ class NotebookHandler(BaseRequestHandler):
         self.session.delete(notebook)
         self.session.commit()
         self.api_success_response(notebook.to_dict())
+
+
+class WatchNotebookHandler(BaseRequestHandler):
+    def post(self, notebook_id):
+        notebook = self.session.query(Notebook).filter(Notebook.id == notebook_id).first()
+        if not notebook:
+            self.api_fail_response(f'Notebook {notebook_id} does not exist.')
+            return
+
+        watch = self.session.query(Watch).filter_by(
+            target_id=notebook_id,
+            target_type=N_TARGET_TYPE[3],
+            user_id=self.current_user.id
+        ).first()
+        watch_count = self.session.query(Watch).filter_by(
+            target_id=notebook_id,
+            target_type=N_TARGET_TYPE[3]
+        ).count()
+        if watch:
+            self.api_success_response(watch_count)
+            return
+
+        watch = Watch(target_id=notebook_id,
+                      target_type=N_TARGET_TYPE[3],
+                      user_id=self.current_user.id)
+        self.session.add(watch)
+        self.session.commit()
+        if notebook.owner_type == OWNER_TYPE[0] and \
+                        notebook.owner_id != self.current_user.id:
+            notify_notebook_watch(
+                notebook_owner_id=notebook.owner_id,
+                notebook_id=notebook.id,
+                notebook_name=notebook.name,
+                sender_id=self.current_user.id,
+                session=self.session
+            )
+        feed_notebook_watch(
+            notebook_id=notebook.id,
+            user_id=self.current_user.id,
+            session=self.session
+        )
+        self.api_success_response(watch_count + 1)
+
+    def delete(self, notebook_id):
+        notebook = self.session.query(Notebook).filter(Notebook.id == notebook_id).first()
+        if not notebook:
+            self.api_fail_response(f'Notebook {notebook} does not exist.')
+            return
+        watch = self.session.query(Watch).filter_by(
+            target_id=notebook_id,
+            target_type=N_TARGET_TYPE[3],
+            user_id=self.current_user.id
+        ).first()
+        self.session.delete(watch)
+        self.session.commit()
+        self.api_success_response(True)

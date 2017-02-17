@@ -37,10 +37,12 @@ api_handlers = [
     (r'/api/note/star/(?P<note_id>[0-9a-f]{32}\Z)?', note.StarNoteHandler),
     (r'/api/notebook/?', notebook.NotebooksHandler),
     (r'/api/notebook/(?P<notebook_id>[0-9a-f]{32}\Z)?', notebook.NotebookHandler),
+    (r'/api/notebook/watch/(?P<notebook_id>[0-9a-f]{32}\Z)?', notebook.WatchNotebookHandler),
     (r'/api/organization/checkname/', organization.CheckHandler),
     (r'/api/organization/', organization.OrganizationHandler),
     (r'/api/organizations/', organization.OrganizationsHandler),
     (r'/api/organization/notebook/', organization.NotebookHandler),
+    (r'/api/organization/people/', organization.PeopleHandler)
 ]
 
 handlers = api_handlers

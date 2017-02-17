@@ -7,7 +7,7 @@
 from sqlalchemy import func
 from .base import BaseRequestHandler
 from note4s.models import Organization, Membership, O_ROLE, \
-    Notebook, OWNER_TYPE, Watch, N_TARGET_TYPE
+    Notebook, OWNER_TYPE, Watch, N_TARGET_TYPE, User
 
 
 class CheckHandler(BaseRequestHandler):
@@ -98,7 +98,42 @@ class NotebookHandler(BaseRequestHandler):
             Watch.target_id.in_(notebook_ids),
             Watch.target_type == N_TARGET_TYPE[3]
         ).group_by(Watch.target_id).all()
-        if watches:
-            import pytest
-            pytest.set_trace()
-        self.api_success_response([notebook.to_dict() for notebook in notebooks])
+        watch_info = {}
+        for watch in watches:
+            watch_info[watch[0]] = watch[1]
+        result = []
+        for notebook in notebooks:
+            notebook_info = notebook.to_dict()
+            notebook_info["watch_count"] = watch_info.get(notebook.id, 0)
+            result.append(notebook_info)
+        self.api_success_response(result)
+
+
+
+class PeopleHandler(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        name = self.get_argument("name", None)
+        if not name:
+            self.api_fail_response(f'name cannot be empty.')
+            return
+        organization = self.session.query(Organization).filter(Organization.name == name).first()
+        if not organization:
+            self.api_fail_response(f'Organization {name} does not exist.')
+            return
+        memberships = self.session.query(Membership).filter(
+            Membership.organization_id == organization.id
+        ).all()
+        user_info = {}
+        user_ids = []
+        for membership in memberships:
+            user_info[membership.user_id] = membership.role
+            user_ids.append(membership.user_id)
+        users = self.session.query(User).filter(
+            User.id.in_(user_ids)
+        ).all()
+        result = []
+        for user in users:
+            tmp = user.to_dict()
+            tmp["role"] = user_info[user.id]
+            result.append(tmp)
+        self.api_success_response(result)

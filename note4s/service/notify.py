@@ -152,3 +152,21 @@ def notify_user_follow(user_id, sender_id, session):
     session.add(notification)
     session.add(user_notification)
     session.commit()
+
+
+def notify_notebook_watch(notebook_owner_id, notebook_id, notebook_name, sender_id, session):
+    notification = Notification(
+        type=N_TYPE[0],
+        target_id=notebook_id,
+        target_type=N_TARGET_TYPE[3],
+        target_desc=notebook_name,
+        action=N_ACTION[4],
+        sender_id=sender_id
+    )
+    user_notification = UserNotification(
+        user_id=notebook_owner_id,
+        notification_id=notification.id
+    )
+    session.add(notification)
+    session.add(user_notification)
+    session.commit()

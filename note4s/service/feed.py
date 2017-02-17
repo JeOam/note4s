@@ -81,3 +81,16 @@ def feed_star_note(user_id, note_id, note_title, notebook_id, session):
     )
     session.add(activity)
     session.commit()
+
+
+def feed_notebook_watch(notebook_id, user_id, session):
+    notebook = session.query(Notebook).filter_by(id=notebook_id).one()
+    activity = Activity(
+        target_id=notebook_id,
+        target_type=N_TARGET_TYPE[3],
+        target_desc=notebook.name,
+        action=N_ACTION[4],
+        user_id=user_id
+    )
+    session.add(activity)
+    session.commit()
