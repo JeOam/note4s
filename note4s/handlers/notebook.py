@@ -23,6 +23,7 @@ class NotebooksHandler(BaseRequestHandler):
                 return
         else:
             user = self.current_user
+        membership_info = {}
         if useronly:
             notebooks = self.session.query(Notebook).filter(
                 Notebook.owner_id == user.id,
@@ -33,7 +34,10 @@ class NotebooksHandler(BaseRequestHandler):
                 Membership.user_id == user.id,
                 Membership.role != O_ROLE[2]
             ).all()
-            organization_ids = [membership.organization_id for membership in memberships]
+            organization_ids = []
+            for membership in memberships:
+                organization_ids.append(membership.organization_id)
+                membership_info[membership.organization_id] = membership.role
             notebooks = self.session.query(Notebook).filter(
                 or_(
                     and_(
@@ -61,6 +65,8 @@ class NotebooksHandler(BaseRequestHandler):
                 ).count()
                 notebook_info["type"] = "notebook"
                 notebook_info["watch_count"] = watch_count
+                if notebook.owner_type == OWNER_TYPE[1]:
+                    notebook_info["owner_role"] = membership_info[notebook.owner_id]
                 result.append(notebook_info)
         for notebook in result:
             sections = temp.get(notebook["id"], [])
