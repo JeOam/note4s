@@ -8,9 +8,10 @@ from sqlalchemy import func
 from .base import BaseRequestHandler
 from note4s.models import Organization, Membership, O_ROLE, \
     Notebook, OWNER_TYPE, Watch, N_TARGET_TYPE, User
+from note4s.service.notify import notify_organization_invite
 
 
-class CheckHandler(BaseRequestHandler):
+class CheckNameHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
         params = self.get_params()
         name = params.get("name", None)
@@ -29,6 +30,22 @@ class OrganizationHandler(BaseRequestHandler):
             self.api_fail_response("organization name is invalid.")
             return
         result = organization.to_dict()
+        membership = self.session.query(Membership).filter(
+            Membership.organization_id == organization.id,
+            Membership.user_id == self.current_user.id
+        ).first()
+        if membership:
+            result["role"] = membership.role
+        notebook_count = self.session.query(Notebook).filter(
+            Notebook.owner_id == organization.id,
+            Notebook.owner_type == OWNER_TYPE[1],
+            Notebook.parent_id.is_(None)
+        ).count()
+        people_count = self.session.query(Membership).filter(
+            Membership.role != O_ROLE[3]
+        ).count()
+        result["notebook_count"] = notebook_count
+        result["people_count"] = people_count
         self.api_success_response(result)
 
     def post(self, *args, **kwargs):
@@ -61,7 +78,7 @@ class OrganizationsHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
         memberships = self.session.query(Membership).filter(
             Membership.user_id == self.current_user.id,
-            Membership.role != O_ROLE[2]
+            Membership.role != O_ROLE[3]
         ).all()
         if memberships:
             organization_ids = [membership.organization_id for membership in memberships]
@@ -109,7 +126,6 @@ class NotebookHandler(BaseRequestHandler):
         self.api_success_response(result)
 
 
-
 class PeopleHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
         name = self.get_argument("name", None)
@@ -121,7 +137,8 @@ class PeopleHandler(BaseRequestHandler):
             self.api_fail_response(f'Organization {name} does not exist.')
             return
         memberships = self.session.query(Membership).filter(
-            Membership.organization_id == organization.id
+            Membership.organization_id == organization.id,
+            Membership.role != O_ROLE[3]
         ).all()
         user_info = {}
         user_ids = []
@@ -137,3 +154,88 @@ class PeopleHandler(BaseRequestHandler):
             tmp["role"] = user_info[user.id]
             result.append(tmp)
         self.api_success_response(result)
+
+
+class InviteHandler(BaseRequestHandler):
+    def post(self, *args, **kwargs):
+        params = self.get_params()
+        username = params.get("username")
+        name = params.get("name")
+        if not username or not name:
+            self.api_fail_response(f'Username/Organization Name cannot be empty.')
+            return
+        organization = self.session.query(Organization).filter(Organization.name == name).first()
+        if not organization:
+            self.api_fail_response(f'Organization {name} does not exist.')
+            return
+        my_membership = self.session.query(Membership).filter(
+            Membership.organization_id == organization.id,
+            Membership.user_id == self.current_user.id
+        ).first()
+        if not my_membership or \
+                (my_membership.role != O_ROLE[0] and my_membership.role != O_ROLE[1]):
+            self.api_fail_response(f"You don't have the privilege to invite")
+            return
+
+        user = self.session.query(User).filter(User.username == username).first()
+        if not organization:
+            self.api_fail_response(f'User {username} does not exist.')
+
+        membership = self.session.query(Membership).filter(
+            Membership.organization_id == organization.id,
+            Membership.user_id == user.id
+        ).first()
+        if not membership:
+            membership = Membership(
+                organization_id=organization.id,
+                user_id=user.id,
+                role=O_ROLE[3]
+            )
+            self.session.add(membership)
+            self.session.commit()
+            notify_organization_invite(
+                organization_id=organization.id,
+                organization_name=organization.name,
+                receiver_id=user.id,
+                sender_id=self.current_user.id,
+                session=self.session
+            )
+        self.api_success_response(True)
+
+
+class AcceptHandler(BaseRequestHandler):
+    def post(self, *args, **kwargs):
+        params = self.get_params()
+        name = params.get("name")
+        organization = self.session.query(Organization).filter(Organization.name == name).first()
+        if not organization:
+            self.api_fail_response(f'Organization {name} does not exist.')
+            return
+        membership = self.session.query(Membership).filter(
+            Membership.organization_id == organization.id,
+            Membership.user_id == self.current_user.id
+        ).first()
+        if membership:
+            membership.role = O_ROLE[1]
+            self.session.add(membership)
+            self.session.commit()
+            self.api_success_response(True)
+        else:
+            self.api_fail_response(False)
+
+
+class CheckMembershipHandler(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        name = self.get_argument("name", None)
+        organization = self.session.query(Organization).filter(Organization.name == name).first()
+        if not organization:
+            self.api_fail_response(f'Organization {name} does not exist.')
+            return
+        membership = self.session.query(Membership).filter(
+            Membership.organization_id == organization.id,
+            Membership.user_id == self.current_user.id
+        ).first()
+        if membership and membership.role != O_ROLE[3]:
+            self.api_success_response(True)
+        else:
+            self.api_success_response(False)

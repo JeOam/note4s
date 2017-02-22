@@ -20,7 +20,13 @@ GRANT ALL PRIVILEGES ON DATABASE note4s to note4s;
 CREATE USER note4s_test WITH PASSWORD 'note4s_test';
 CREATE DATABASE note4s_test OWNER note4s_test;
 GRANT ALL PRIVILEGES ON DATABASE note4s_test to note4s_test;
+
+# Update Enum types
+ALTER TYPE enum_type ADD VALUE 'new_value'; -- appends to list
+ALTER TYPE enum_type ADD VALUE 'new_value' BEFORE 'old_value';
+ALTER TYPE enum_type ADD VALUE 'new_value' AFTER 'old_value';
 ```
+
 
 管理:
 ```

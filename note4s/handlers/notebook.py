@@ -190,6 +190,18 @@ class NotebookHandler(BaseRequestHandler):
         if not notebook:
             self.api_fail_response(f'Notebook {notebook_id} does not exist.')
             return
+        if notebook.owner_type == OWNER_TYPE[0] and notebook.owner_id != self.current_user.id:
+            self.api_fail_response('Notebook cannot be deleted because of ownership')
+            return
+        elif notebook.owner_type == OWNER_TYPE[1]:
+            membership = self.session.query(Membership).filter(
+                Membership.organization_id == notebook.owner_id,
+                Membership.user_id == self.current_user.id,
+                Membership.role == O_ROLE[0]
+            ).first()
+            if not membership:
+                self.api_fail_response('Notebook cannot be deleted because of ownership')
+                return
         children_notebooks = self.session.query(Notebook).filter_by(parent_id=notebook_id).count()
         if children_notebooks:
             self.api_fail_response('Notebook cannot be deleted because of nonempty')

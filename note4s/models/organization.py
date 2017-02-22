@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import UUID, ENUM
 
 from .base import BaseModel
 
-ROLE = ('owner', 'collaborator', 'visitor')
+ROLE = ('owner', 'collaborator', 'visitor', 'invited')
 ROLE_ENUM = ENUM(*ROLE, name='role')
 
 

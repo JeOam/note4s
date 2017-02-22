@@ -10,6 +10,7 @@
     5. Star 了你的 Note
     6. Watch 了你的 Note
     7. 关注了你
+    8. 谁要请你加入什么组织
 """
 from note4s.models import (
     Notification, N_TYPE, N_TARGET_TYPE, N_ACTION,
@@ -165,6 +166,24 @@ def notify_notebook_watch(notebook_owner_id, notebook_id, notebook_name, sender_
     )
     user_notification = UserNotification(
         user_id=notebook_owner_id,
+        notification_id=notification.id
+    )
+    session.add(notification)
+    session.add(user_notification)
+    session.commit()
+
+
+def notify_organization_invite(organization_id, organization_name, receiver_id, sender_id, session):
+    notification = Notification(
+        type=N_TYPE[0],
+        target_id=organization_id,
+        target_type=N_TARGET_TYPE[5],
+        target_desc=organization_name,
+        action=N_ACTION[8],
+        sender_id=sender_id
+    )
+    user_notification = UserNotification(
+        user_id=receiver_id,
         notification_id=notification.id
     )
     session.add(notification)
