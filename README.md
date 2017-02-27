@@ -44,12 +44,10 @@ alembic upgrade head
 ```
 
 权限控制：
-  * 团队管理
   * 私密与公开
 
 资料导出：
   * Notebook 导出成 PDF
-  * Notebook 导出到 GitHub Pages
 
 基础增强：
   * Note Git Diff
