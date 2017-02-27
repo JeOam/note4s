@@ -242,7 +242,8 @@ $if(toc)$
 $if(colorlinks)$
 \hypersetup{linkcolor=$if(toccolor)$$toccolor$$else$black$endif$}
 $endif$
-\setcounter{tocdepth}{$toc-depth$}
+% \setcounter{tocdepth}{$toc-depth$}
+\setcounter{tocdepth}{2}  % Setting TOC depth
 \tableofcontents
 }
 $endif$
