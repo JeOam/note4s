@@ -60,3 +60,4 @@ target/
 .vagrant/
 Vagrantfile
 alembic/versions/
+GIT_DIR/

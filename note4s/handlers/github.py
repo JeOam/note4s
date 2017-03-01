@@ -10,6 +10,7 @@ from .base import BaseRequestHandler
 from note4s import settings
 from note4s.models import User
 from note4s.utils import create_jwt
+from note4s.service.git import create_git_repo
 
 
 class GithubCallbackHandler(BaseRequestHandler):
@@ -36,6 +37,7 @@ class GithubCallbackHandler(BaseRequestHandler):
                                     email=userinfo.get('email'))
                         self.session.add(user)
                         self.session.commit()
+                        create_git_repo(user.id.hex)
                     else:
                         user.nickname = userinfo.get('name')
                         user.avatar = userinfo.get('avatar_url')

@@ -15,6 +15,7 @@ from note4s.models import User, Watch, N_TARGET_TYPE, \
 from note4s.utils import create_jwt
 from note4s.service.notify import notify_user_follow
 from note4s.service.feed import feed_follow_user
+from note4s.service.git import create_git_repo
 from .base import BaseRequestHandler
 
 
@@ -52,14 +53,11 @@ class RegisterHandler(BaseRequestHandler):
         user = User(username=username,
                     email=email,
                     password=generate_password_hash(password))
-        try:
-            self.session.add(user)
-            self.session.commit()
-        except Exception as e:
-            self.session.rollback()
-            self.api_fail_response("Failed to create user.")
-        else:
-            self.api_success_response(user.to_dict())
+        self.session.add(user)
+        self.session.commit()
+        create_git_repo(user.id.hex)
+        self.api_success_response(user.to_dict())
+
 
 
 class CheckHandler(BaseRequestHandler):

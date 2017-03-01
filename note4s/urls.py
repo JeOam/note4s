@@ -35,6 +35,7 @@ api_handlers = [
     (r'/api/note/comment/star/(?P<comment_id>[0-9a-f]{32}\Z)?', comment.StarCommentHandler),
     (r'/api/note/watch/(?P<note_id>[0-9a-f]{32}\Z)?', note.WatchNoteHandler),
     (r'/api/note/star/(?P<note_id>[0-9a-f]{32}\Z)?', note.StarNoteHandler),
+    (r'/api/note/revision/(?P<note_id>[0-9a-f]{32}\Z)?', note.NoteRevisionHandler),
     (r'/api/notebook/?', notebook.NotebooksHandler),
     (r'/api/notebook/(?P<notebook_id>[0-9a-f]{32}\Z)?', notebook.NotebookHandler),
     (r'/api/notebook/watch/(?P<notebook_id>[0-9a-f]{32}\Z)?', notebook.WatchNotebookHandler),

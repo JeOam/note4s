@@ -9,6 +9,8 @@ from .base import BaseRequestHandler
 from note4s.models import Note, Notebook, Watch, Star, N_TARGET_TYPE, Comment, User
 from note4s.service.notify import notify_note_star, notify_note_watch
 from note4s.service.feed import feed_new_note, feed_new_subnote, feed_star_note
+from note4s.service.git import edit_git_note, delete_git_note, \
+    get_note_revision_count, get_note_history
 
 
 class NoteHandler(BaseRequestHandler):
@@ -29,12 +31,18 @@ class NoteHandler(BaseRequestHandler):
             for user in users:
                 userinfo[user.id] = user.to_dict(["username", "avatar", "nickname"])
             for note in notes:
+                revision_count = get_note_revision_count(
+                    user_id=note.user_id.hex,
+                    note_id=note.id.hex
+                )
                 if note.id.hex == note_id:
                     result = note.to_dict()
                     result["user"] = userinfo[note.user_id]
+                    result["revision_count"] = revision_count
                 else:
                     subnote = note.to_dict()
                     subnote["user"] = userinfo[note.user_id]
+                    subnote["revision_count"] = revision_count
                     subnotes.append(subnote)
             if result.get('id') is None:
                 self.api_fail_response(f'Note {note_id} does not exist.')
@@ -120,11 +128,15 @@ class NoteHandler(BaseRequestHandler):
                       note_title=note.title,
                       notebook_id=notebook_id,
                       session=self.session)
+        edit_git_note(user_id=self.current_user.id.hex,
+                      note_id=note.id.hex,
+                      content=content)
         self.api_success_response(note.to_dict())
 
     def put(self, note_id):
         note = self.session.query(Note).filter_by(user=self.current_user, id=note_id).first()
         if note:
+            old_content = note.content
             if note.parent_id:
                 keys = set(['content'])
             else:
@@ -142,6 +154,10 @@ class NoteHandler(BaseRequestHandler):
                     self.session.add(notebook)
             self.update_modal(note, keys)
             self.session.commit()
+            if note.content != old_content:
+                edit_git_note(user_id=note.user_id.hex,
+                              note_id=note.id.hex,
+                              content=note.content)
             self.api_success_response(note.to_dict())
         else:
             self.api_fail_response(f'Note {note_id} does not exist.')
@@ -154,6 +170,8 @@ class NoteHandler(BaseRequestHandler):
         if note:
             self.session.delete(note)
             self.session.commit()
+            delete_git_note(user_id=note.user_id.hex,
+                            note_id=note.id.hex)
             self.api_success_response(True)
         else:
             self.api_fail_response(f'Note {note_id} does not exist.')
@@ -173,6 +191,9 @@ class SubNoteHandler(BaseRequestHandler):
                          note_id=parent_id,
                          subnote_id=note.id,
                          session=self.session)
+        edit_git_note(user_id=self.current_user.id.hex,
+                      note_id=note.id.hex,
+                      content=content)
         result = note.to_dict()
         result["user"] = self.current_user.to_dict(["username", "avatar", "nickname"])
         self.api_success_response(result)
@@ -282,3 +303,16 @@ class StarNoteHandler(BaseRequestHandler):
         self.session.delete(star)
         self.session.commit()
         self.api_success_response(True)
+
+
+class NoteRevisionHandler(BaseRequestHandler):
+    def get(self, note_id):
+        note = self.session.query(Note).filter(Note.id == note_id).first()
+        if not note:
+            self.api_fail_response(f'Note {note_id} does not exist.')
+            return
+        diffs = get_note_history(
+            user_id=note.user_id.hex,
+            note_id=note.id.hex
+        )
+        self.api_success_response(diffs)
