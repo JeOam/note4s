@@ -4,9 +4,8 @@
     git.py
     ~~~~~~~
 """
-import logging
 import os
-from git import Repo
+from git import Repo, Actor
 from note4s import settings
 
 
@@ -21,7 +20,7 @@ def create_git_repo(user_id):
         Repo.init(git_path)
 
 
-def edit_git_note(user_id, note_id, content):
+def edit_git_note(user_id, note_id, content, author="note4s"):
     """
     已有此 ID 文件则更新，没有则新建
     """
@@ -33,10 +32,11 @@ def edit_git_note(user_id, note_id, content):
     file.close()
     repo = Repo(git_path)
     repo.index.add([f"{note_id}.md"])
-    repo.index.commit(f"edit note {note_id}")
+    commit_author = Actor(name=author, email=author)
+    repo.index.commit(f"edit note {note_id}", author=commit_author, committer=commit_author)
 
 
-def delete_git_note(user_id, note_id):
+def delete_git_note(user_id, note_id, author="note4s"):
     """
     删除某 note 对应的文件
     :return:
@@ -46,7 +46,8 @@ def delete_git_note(user_id, note_id):
     os.remove(file_path)
     repo = Repo(git_path)
     repo.index.remove([f"{note_id}.md"])
-    repo.index.commit(f"delete note {note_id}")
+    commit_author = Actor(name=author, email=author)
+    repo.index.commit(f"delete note {note_id}", author=commit_author, committer=commit_author)
 
 
 def get_note_revision_count(user_id, note_id):
@@ -54,6 +55,8 @@ def get_note_revision_count(user_id, note_id):
     查询更新次数
     """
     git_path = settings.GIT_DIR + user_id
+    if not os.path.exists(git_path):
+        return 0
     repo = Repo(git_path)
     count = len(list(repo.iter_commits(paths=f"{note_id}.md")))
     if count > 0:
@@ -70,5 +73,9 @@ def get_note_history(user_id, note_id, commit_count=10):
     commits = list(repo.iter_commits(paths=f"{note_id}.md", max_count=commit_count))
     commit_diffs = []
     for commit1, commit2 in zip(commits, commits[1:]):
-        commit_diffs.append(repo.git.diff(commit2, commit1))
+        commit_diffs.append({
+            "diff": repo.git.diff(commit2, commit1, f"{note_id}.md"),
+            "created": str(commit1.committed_datetime),
+            "user": str(commit1.author)
+        })
     return commit_diffs

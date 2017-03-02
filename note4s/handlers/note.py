@@ -130,7 +130,8 @@ class NoteHandler(BaseRequestHandler):
                       session=self.session)
         edit_git_note(user_id=self.current_user.id.hex,
                       note_id=note.id.hex,
-                      content=content)
+                      content=content,
+                      author=self.current_user.username)
         self.api_success_response(note.to_dict())
 
     def put(self, note_id):
@@ -155,9 +156,12 @@ class NoteHandler(BaseRequestHandler):
             self.update_modal(note, keys)
             self.session.commit()
             if note.content != old_content:
-                edit_git_note(user_id=note.user_id.hex,
-                              note_id=note.id.hex,
-                              content=note.content)
+                user = self.session.query(User).filter_by(id=note.user_id).first()
+                if user:
+                    edit_git_note(user_id=note.user_id.hex,
+                                  note_id=note.id.hex,
+                                  content=note.content,
+                                  author=user.username)
             self.api_success_response(note.to_dict())
         else:
             self.api_fail_response(f'Note {note_id} does not exist.')
@@ -193,7 +197,8 @@ class SubNoteHandler(BaseRequestHandler):
                          session=self.session)
         edit_git_note(user_id=self.current_user.id.hex,
                       note_id=note.id.hex,
-                      content=content)
+                      content=content,
+                      author=self.current_user.username)
         result = note.to_dict()
         result["user"] = self.current_user.to_dict(["username", "avatar", "nickname"])
         self.api_success_response(result)

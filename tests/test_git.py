@@ -6,7 +6,6 @@
 """
 import os
 import shutil
-import pytest
 from note4s import settings
 from note4s.service.git import (
     create_git_repo,
@@ -34,7 +33,8 @@ def test_edit_git_note():
     diffs = get_note_history("test_user_id", "test_note_id", 10)
     assert len(diffs) == 1
     for diff in diffs:
-        assert diff.startswith("diff --git a/test_note_id.md b/test_note_id.md\n")
+        assert diff["user"] == "note4s"
+        assert diff["diff"].startswith("diff --git a/test_note_id.md b/test_note_id.md\n")
     shutil.rmtree(settings.GIT_DIR + "test_user_id", ignore_errors=True)
 
 
