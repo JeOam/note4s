@@ -155,6 +155,7 @@ class NoteHandler(BaseRequestHandler):
                     self.session.add(notebook)
             self.update_modal(note, keys)
             self.session.commit()
+            result = note.to_dict()
             if note.content != old_content:
                 user = self.session.query(User).filter_by(id=note.user_id).first()
                 if user:
@@ -162,7 +163,11 @@ class NoteHandler(BaseRequestHandler):
                                   note_id=note.id.hex,
                                   content=note.content,
                                   author=user.username)
-            self.api_success_response(note.to_dict())
+                    result["revision_count"] = get_note_revision_count(
+                        user_id=note.user_id.hex,
+                        note_id=note.id.hex
+                    )
+            self.api_success_response(result)
         else:
             self.api_fail_response(f'Note {note_id} does not exist.')
 

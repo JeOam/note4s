@@ -4,9 +4,11 @@
     test_login.py
     ~~~~~~~
 """
+import shutil
 from datetime import datetime
 import pytest
-from note4s.models import Watch, N_TARGET_TYPE, Notification, UserNotification, Activity
+from note4s.models import Watch, N_TARGET_TYPE, Notification, Activity
+from note4s import settings
 from .base import BaseHTTPTestCase
 from .conftest import session
 
@@ -35,6 +37,8 @@ class UserTestCase(BaseHTTPTestCase):
         assert result["data"]["id"]
         assert result["data"]["email"] == data["email"]
         assert not result["data"].get("password")
+        shutil.rmtree(settings.GIT_DIR + result["data"]["id"], ignore_errors=True)
+
 
     @pytest.mark.usefixtures("note", "user", "token", "another_user", "another_token")
     def test_follow_user(self):

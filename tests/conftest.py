@@ -4,11 +4,13 @@
     conftest.py
     ~~~~~~~
 """
+import shutil
 import pytest
 from werkzeug.security import generate_password_hash
 from note4s.models import engine, BaseModel, Session, \
     User, Note, Notebook, OWNER_TYPE
 from note4s.utils import create_jwt
+from note4s import settings
 
 session = Session()
 
@@ -36,6 +38,7 @@ def user(database, request):
     session.commit()
 
     def finalizer():
+        shutil.rmtree(settings.GIT_DIR + user.id.hex, ignore_errors=True)
         session.delete(user)
         session.commit()
 
@@ -53,6 +56,7 @@ def another_user(database, request):
     session.commit()
 
     def finalizer():
+        shutil.rmtree(settings.GIT_DIR + user.id.hex, ignore_errors=True)
         session.delete(user)
         session.commit()
 
