@@ -31,7 +31,7 @@ ALTER TYPE enum_type ADD VALUE 'new_value' AFTER 'old_value';
 管理:
 ```
 # 创建表格
-$ python manage.py --command=sync_db
+$ python manage.py --command=create_table
 
 # 单元测试
 $ py.test -s # -s to show verbose message
@@ -44,12 +44,11 @@ alembic upgrade head
 ```
 
 权限控制：
-  * 私密与公开
+  * 私密与公开, 游客可见
 
 资料导出：
   * Notebook 导出成 PDF
 
 基础增强：
-  * Note Git Diff
-  * 文件存储 - 文件保存至 Git 文件夹内
+  * 支持用户上传图片文件，并存储到用户 Git 文件夹内
   * 内容搜索 - Elasticsearch

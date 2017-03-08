@@ -6,7 +6,8 @@
 """
 from sqlalchemy import (
     Column,
-    String
+    String,
+    Boolean
 )
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 
@@ -22,3 +23,4 @@ class Notebook(BaseModel):
     note_id = Column(UUID(as_uuid=True))
     owner_id = Column(UUID(as_uuid=True))
     owner_type = Column(OWNER_TYPE_ENUM)
+    private = Column(Boolean, default=False)

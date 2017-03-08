@@ -46,6 +46,7 @@ def user(database, request):
     request.cls.user = user
     return user
 
+
 @pytest.fixture(scope="function")
 def another_user(database, request):
     user = User(username="another_user",
@@ -64,11 +65,13 @@ def another_user(database, request):
     request.cls.another_user = user
     return user
 
+
 @pytest.fixture(scope="function")
 def token(user, request):
     token = create_jwt(user_id=user.id.hex).decode("utf-8")
     request.cls.token = token
     return token
+
 
 @pytest.fixture(scope="function")
 def another_token(another_user, request):
@@ -76,26 +79,41 @@ def another_token(another_user, request):
     request.cls.another_token = token
     return token
 
+
 @pytest.fixture(scope="function")
-def note_section(user, request):
+def notebook(user, request):
     notebook = Notebook(owner_id=user.id,
                         owner_type=OWNER_TYPE[0],
                         name="test notebook")
+    session.add(notebook)
+    session.commit()
+
+    def finalizer():
+        session.delete(notebook)
+        session.commit()
+
+    request.addfinalizer(finalizer)
+    request.cls.notebook = notebook
+    return notebook
+
+
+@pytest.fixture(scope="function")
+def note_section(user, notebook, request):
     note_section = Notebook(owner_id=user.id,
                             owner_type=OWNER_TYPE[0],
                             name="test note section",
                             parent_id=notebook.id)
-    session.add(notebook)
     session.add(note_section)
     session.commit()
+
     def finalizer():
-        session.delete(notebook)
         session.delete(note_section)
         session.commit()
 
     request.addfinalizer(finalizer)
     request.cls.note_section = note_section
     return note_section
+
 
 @pytest.fixture(scope="function")
 def note(user, note_section, request):
@@ -159,3 +177,58 @@ def notebooks(user, request):
         session.commit()
 
     request.addfinalizer(finalizer)
+
+
+@pytest.fixture(scope="function")
+def private_notebook(another_user, request):
+    notebook = Notebook(owner_id=another_user.id,
+                        owner_type=OWNER_TYPE[0],
+                        name="test notebook",
+                        private=True)
+    session.add(notebook)
+    session.commit()
+
+    def finalizer():
+        session.delete(notebook)
+        session.commit()
+
+    request.addfinalizer(finalizer)
+    request.cls.private_notebook = notebook
+    return notebook
+
+
+@pytest.fixture(scope="function")
+def private_note_section(another_user, private_notebook, request):
+    note_section = Notebook(owner_id=another_user.id,
+                            owner_type=OWNER_TYPE[0],
+                            name="test note section",
+                            parent_id=private_notebook.id)
+    session.add(note_section)
+    session.commit()
+
+    def finalizer():
+        session.delete(note_section)
+        session.commit()
+
+    request.addfinalizer(finalizer)
+    request.cls.private_note_section = note_section
+    return note_section
+
+
+@pytest.fixture(scope="function")
+def private_note(user, private_note_section, request):
+    note = Note(user=user,
+                title="test title",
+                content="test content",
+                section_id=private_note_section.id,
+                notebook_id=private_note_section.parent_id)
+    session.add(note)
+    session.commit()
+
+    def finalizer():
+        session.delete(note)
+        session.commit()
+
+    request.addfinalizer(finalizer)
+    request.cls.private_note = note
+    return note

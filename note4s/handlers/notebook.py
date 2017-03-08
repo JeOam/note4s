@@ -85,19 +85,22 @@ class NotebooksHandler(BaseRequestHandler):
         name = params.get("name")
         parent_id = params.get('parent_id')
         organization_id = params.get('organization_id')
+        private = params.get('private', False)
         if organization_id:
             notebook = Notebook(owner_id=organization_id,
                                 owner_type=OWNER_TYPE[1],
                                 name=name,
-                                parent_id=parent_id)
+                                parent_id=parent_id,
+                                private=private)
         else:
             notebook = Notebook(owner_id=self.current_user.id,
                                 owner_type=OWNER_TYPE[0],
                                 name=name,
-                                parent_id=parent_id)
+                                parent_id=parent_id,
+                                private=private)
         self.session.add(notebook)
         self.session.commit()
-        if not parent_id and not organization_id:
+        if not parent_id and not organization_id and not private:
             feed_new_notebook(
                 user_id=self.current_user.id,
                 notebook_id=notebook.id,
@@ -119,6 +122,23 @@ class NotebookHandler(BaseRequestHandler):
         if not owner:
             self.api_fail_response(f'Notebook {notebook_id} does not belong to any user/organization.')
             return
+        if notebook.private:
+            if not self.current_user:
+                self.api_fail_response(f'Notebook {notebook_id} does not exist', 404)
+                return
+            if notebook.owner_type == OWNER_TYPE[0]:
+                if notebook.owner_id != self.current_user.id:
+                    self.api_fail_response(f'Notebook {notebook_id} does not exist', 404)
+                    return
+            else:
+                membership = self.session.query(Membership).filter(
+                    Membership.organization_id == notebook.owner_id,
+                    Membership.user_id == self.current_user.id,
+                    Membership.role != O_ROLE[3]
+                ).count()
+                if membership == 0:
+                    self.api_fail_response(f'Notebook {notebook_id} does not exist', 404)
+                    return
         owner_info = owner.to_dict()
         notebook_ids = self.session.query(Notebook.id).filter(
             Notebook.owner_id == owner.id,
@@ -154,11 +174,14 @@ class NotebookHandler(BaseRequestHandler):
         notebook_info = notebook.to_dict()
         notebook_info["owner"] = owner_info
         notebook_info["owner_type"] = notebook.owner_type
-        is_watch = self.session.query(Watch.id).filter(
-            Watch.target_id == notebook.id,
-            Watch.target_type == N_TARGET_TYPE[3],
-            Watch.user_id == self.current_user.id
-        ).count()
+        if self.current_user:
+            is_watch = self.session.query(Watch.id).filter(
+                Watch.target_id == notebook.id,
+                Watch.target_type == N_TARGET_TYPE[3],
+                Watch.user_id == self.current_user.id
+            ).count()
+        else:
+            is_watch = 0
         notebook_info["is_watch"] = True if is_watch else False
         watch_count = self.session.query(Watch.id).filter(
             Watch.target_id == notebook.id,

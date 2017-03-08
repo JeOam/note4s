@@ -6,7 +6,8 @@
 """
 from sqlalchemy import or_, asc
 from .base import BaseRequestHandler
-from note4s.models import Note, Notebook, Watch, Star, N_TARGET_TYPE, Comment, User
+from note4s.models import Note, Notebook, OWNER_TYPE, \
+    Watch, Star, N_TARGET_TYPE, Comment, User, Membership, O_ROLE
 from note4s.service.notify import notify_note_star, notify_note_watch
 from note4s.service.feed import feed_new_note, feed_new_subnote, feed_star_note
 from note4s.service.git import edit_git_note, delete_git_note, \
@@ -15,85 +16,109 @@ from note4s.service.git import edit_git_note, delete_git_note, \
 
 class NoteHandler(BaseRequestHandler):
     def get(self, note_id):
+        note = self.session.query(Note).filter_by(id=note_id).first()
+        if not note:
+            self.api_fail_response(f'Note {note_id} does not exist.', 404)
+            return
+        notebook = self.session.query(Notebook).filter_by(id=note.notebook_id).first()
+        if not notebook:
+            self.api_fail_response(f'Note does not own to any notebook.')
+            return
+        if notebook.private:
+            if not self.current_user:
+                self.api_fail_response(f'Note {note_id} does not exist', 404)
+                return
+            if notebook.owner_type == OWNER_TYPE[0]:
+                if notebook.owner_id != self.current_user.id:
+                    self.api_fail_response(f'Note {note_id} does not exist', 404)
+                    return
+            else:
+                membership = self.session.query(Membership).filter(
+                    Membership.organization_id == notebook.owner_id,
+                    Membership.user_id == self.current_user.id,
+                    Membership.role != O_ROLE[3]
+                ).count()
+                if membership == 0:
+                    self.api_fail_response(f'Note {note_id} does not exist', 404)
+                    return
         notes = self.session.query(Note). \
             filter(or_(Note.id == note_id,
                        Note.parent_id == note_id)). \
             order_by(asc(Note.created)). \
             all()
-        if len(notes) == 0:
+        result = {}
+        subnotes = []
+        user_ids = [note.user_id for note in notes]
+        users = self.session.query(User).filter(User.id.in_(user_ids)).all()
+        userinfo = {}
+        for user in users:
+            userinfo[user.id] = user.to_dict(["username", "avatar", "nickname"])
+        for note in notes:
+            revision_count = get_note_revision_count(
+                user_id=note.user_id.hex,
+                note_id=note.id.hex
+            )
+            if note.id.hex == note_id:
+                result = note.to_dict()
+                result["user"] = userinfo[note.user_id]
+                result["revision_count"] = revision_count
+            else:
+                subnote = note.to_dict()
+                subnote["user"] = userinfo[note.user_id]
+                subnote["revision_count"] = revision_count
+                subnotes.append(subnote)
+        if result.get('id') is None:
             self.api_fail_response(f'Note {note_id} does not exist.')
-        else:
-            result = {}
-            subnotes = []
-            user_ids = [note.user_id for note in notes]
-            users = self.session.query(User).filter(User.id.in_(user_ids)).all()
-            userinfo = {}
-            for user in users:
-                userinfo[user.id] = user.to_dict(["username", "avatar", "nickname"])
-            for note in notes:
-                revision_count = get_note_revision_count(
-                    user_id=note.user_id.hex,
-                    note_id=note.id.hex
-                )
-                if note.id.hex == note_id:
-                    result = note.to_dict()
-                    result["user"] = userinfo[note.user_id]
-                    result["revision_count"] = revision_count
-                else:
-                    subnote = note.to_dict()
-                    subnote["user"] = userinfo[note.user_id]
-                    subnote["revision_count"] = revision_count
-                    subnotes.append(subnote)
-            if result.get('id') is None:
-                self.api_fail_response(f'Note {note_id} does not exist.')
-                return
-            notebooks = self.session.query(Notebook). \
-                filter(or_(Notebook.id == result.get('notebook_id'),
-                           Notebook.id == result.get('section_id'),
-                           Notebook.parent_id == result.get('notebook_id'))). \
-                all()
+            return
+        notebooks = self.session.query(Notebook). \
+            filter(or_(Notebook.id == result.get('notebook_id'),
+                       Notebook.id == result.get('section_id'),
+                       Notebook.parent_id == result.get('notebook_id'))). \
+            all()
 
-            children = []
-            for notebook in notebooks:
-                if notebook.id.hex == result.get('notebook_id'):
-                    result["notebook"] = notebook.to_dict()
-                elif notebook.id.hex == result.get('section_id'):
-                    result["section"] = notebook.to_dict()
-                if notebook.parent_id and notebook.parent_id.hex == result.get('notebook_id'):
-                    children.append(notebook.to_dict())
-            if result.get('notebook'):
-                result["notebook"]["children"] = children
-            result["subnotes"] = subnotes
+        children = []
+        for notebook in notebooks:
+            if notebook.id.hex == result.get('notebook_id'):
+                result["notebook"] = notebook.to_dict()
+            elif notebook.id.hex == result.get('section_id'):
+                result["section"] = notebook.to_dict()
+            if notebook.parent_id and notebook.parent_id.hex == result.get('notebook_id'):
+                children.append(notebook.to_dict())
+        if result.get('notebook'):
+            result["notebook"]["children"] = children
+        result["subnotes"] = subnotes
 
-            watch_count = self.session.query(Watch).filter_by(
-                target_id=note_id,
-                target_type=N_TARGET_TYPE[1]
-            ).count()
+        watch_count = self.session.query(Watch).filter_by(
+            target_id=note_id,
+            target_type=N_TARGET_TYPE[1]
+        ).count()
+        star_count = self.session.query(Star).filter_by(
+            target_id=note_id,
+            target_type=N_TARGET_TYPE[1]
+        ).count()
+        if self.current_user:
             is_watch = self.session.query(Watch).filter_by(
                 target_id=note_id,
                 target_type=N_TARGET_TYPE[1],
                 user_id=self.current_user.id
             ).first()
-            star_count = self.session.query(Star).filter_by(
-                target_id=note_id,
-                target_type=N_TARGET_TYPE[1]
-            ).count()
             is_star = self.session.query(Star).filter_by(
                 target_id=note_id,
                 target_type=N_TARGET_TYPE[1],
                 user_id=self.current_user.id
             ).first()
-
-            comment_count = self.session.query(Comment).filter_by(
-                note_id=note_id,
-            ).count()
-
-            result['watch_count'] = watch_count
-            result['is_watch'] = bool(is_watch)
-            result['star_count'] = star_count
-            result['is_star'] = bool(is_star)
-            result['comment_count'] = comment_count
-            self.api_success_response(result)
+        else:
+            is_watch = None
+            is_star = None
+        comment_count = self.session.query(Comment).filter_by(
+            note_id=note_id,
+        ).count()
+        result['watch_count'] = watch_count
+        result['is_watch'] = bool(is_watch)
+        result['star_count'] = star_count
+        result['is_star'] = bool(is_star)
+        result['comment_count'] = comment_count
+        self.api_success_response(result)
 
     def post(self, *args, **kwargs):
         params = self.get_params()
@@ -101,6 +126,7 @@ class NoteHandler(BaseRequestHandler):
         content = params.get("content")
         section_id = params.get('section_id')
         notebook_id = params.get('notebook_id')
+        private = params.get('private', False)
         if not notebook_id or not section_id:
             self.api_fail_response('Notebook or Section is required.')
             return
@@ -123,11 +149,12 @@ class NoteHandler(BaseRequestHandler):
         self.session.add(note)
         self.session.add(notebook)
         self.session.commit()
-        feed_new_note(user_id=self.current_user.id,
-                      note_id=note.id,
-                      note_title=note.title,
-                      notebook_id=notebook_id,
-                      session=self.session)
+        if not private:
+            feed_new_note(user_id=self.current_user.id,
+                          note_id=note.id,
+                          note_title=note.title,
+                          notebook_id=notebook_id,
+                          session=self.session)
         edit_git_note(user_id=self.current_user.id.hex,
                       note_id=note.id.hex,
                       content=content,

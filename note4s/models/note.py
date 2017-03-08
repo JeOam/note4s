@@ -7,8 +7,7 @@
 from sqlalchemy import (
     Column,
     String,
-    ForeignKey,
-    Boolean
+    ForeignKey
 )
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.dialects.postgresql import UUID
@@ -23,6 +22,5 @@ class Note(BaseModel):
     parent_id = Column(UUID(as_uuid=True))
     section_id = Column(UUID(as_uuid=True))
     notebook_id = Column(UUID(as_uuid=True))
-    private = Column(Boolean)
     user_id = Column(UUID(as_uuid=True), ForeignKey('user.id'))
     user = relationship(User, backref=backref("notes", cascade="all, delete-orphan"))
