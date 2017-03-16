@@ -76,6 +76,9 @@ class OrganizationHandler(BaseRequestHandler):
 
 class OrganizationsHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
+        if not self.current_user:
+            self.api_success_response([])
+            return
         memberships = self.session.query(Membership).filter(
             Membership.user_id == self.current_user.id,
             Membership.role != O_ROLE[3]

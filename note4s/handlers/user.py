@@ -83,6 +83,9 @@ class MentionHandler(BaseRequestHandler):
 
 class ProfileHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
+        if not self.current_user:
+            self.api_success_response({})
+            return
         username = self.get_argument("username", None)
         if username:
             user = self.session.query(User).filter_by(username=username).first()
@@ -225,9 +228,15 @@ class StarHandler(BaseRequestHandler):
             notes = self.session.query(Note).filter(
                 Note.id.in_(note_ids)
             ).all()
+            notebook_ids = [note.notebook_id for note in notes]
+            notebook_private_ids = self.session.query(Notebook.id).filter(
+                Notebook.id.in_(notebook_ids),
+                Notebook.private == True
+            ).all()
+            notebook_private_ids = [notebook_id[0] for notebook_id in notebook_private_ids]
             # TODO make sure notes is in order by note_ids
             notes = sorted(notes, key=lambda o: note_ids.index(o.id))
-            result = [note.to_dict() for note in notes]
+            result = [note.to_dict() for note in notes if note.notebook_id not in notebook_private_ids]
         else:
             result = []
         self.api_success_response(result)
@@ -346,7 +355,7 @@ class ContributionHandler(BaseRequestHandler):
             return
         user = self.session.query(User).filter_by(username=username).first()
         if not user:
-            self.api_fail_response(f'user {username} is invalid')
+            self.api_fail_response(f'User {username} does not exist.')
             return
         query_results = self.session.query(
             func.date_part('year', Note.created),
@@ -371,6 +380,9 @@ class ContributionHandler(BaseRequestHandler):
 
 class ActivityHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
+        if not self.current_user:
+            self.api_success_response([])
+            return
         username = self.get_argument("username", None)
         if username:
             user = self.session.query(User).filter_by(username=username).first()

@@ -21,14 +21,24 @@ class NotebooksHandler(BaseRequestHandler):
             if not user:
                 self.api_fail_response(f'User {username} does not exist.')
                 return
-        else:
+        elif self.current_user:
             user = self.current_user
+        else:
+            self.api_success_response([])
+            return
         membership_info = {}
         if useronly:
-            notebooks = self.session.query(Notebook).filter(
-                Notebook.owner_id == user.id,
-                Notebook.owner_type == OWNER_TYPE[0]
-            ).all()
+            if self.current_user and self.current_user.username == user.username:
+                notebooks = self.session.query(Notebook).filter(
+                    Notebook.owner_id == user.id,
+                    Notebook.owner_type == OWNER_TYPE[0]
+                ).all()
+            else:
+                notebooks = self.session.query(Notebook).filter(
+                    Notebook.owner_id == user.id,
+                    Notebook.owner_type == OWNER_TYPE[0],
+                    Notebook.private == False
+                ).all()
         else:
             memberships = self.session.query(Membership).filter(
                 Membership.user_id == user.id,
@@ -38,17 +48,32 @@ class NotebooksHandler(BaseRequestHandler):
             for membership in memberships:
                 organization_ids.append(membership.organization_id)
                 membership_info[membership.organization_id] = membership.role
-            notebooks = self.session.query(Notebook).filter(
-                or_(
-                    and_(
-                        Notebook.owner_id == user.id,
-                        Notebook.owner_type == OWNER_TYPE[0]
-                    ), and_(
-                        Notebook.owner_id.in_(organization_ids),
-                        Notebook.owner_type == OWNER_TYPE[1]
+            if self.current_user and self.current_user.username == user.username:
+                notebooks = self.session.query(Notebook).filter(
+                    or_(
+                        and_(
+                            Notebook.owner_id == user.id,
+                            Notebook.owner_type == OWNER_TYPE[0]
+                        ), and_(
+                            Notebook.owner_id.in_(organization_ids),
+                            Notebook.owner_type == OWNER_TYPE[1]
+                        )
                     )
-                )
-            ).all()
+                ).all()
+            else:
+                notebooks = self.session.query(Notebook).filter(
+                    or_(
+                        and_(
+                            Notebook.owner_id == user.id,
+                            Notebook.owner_type == OWNER_TYPE[0],
+                            Notebook.private == False
+                        ), and_(
+                            Notebook.owner_id.in_(organization_ids),
+                            Notebook.owner_type == OWNER_TYPE[1],
+                            Notebook.private == False
+                        )
+                    )
+                ).all()
         temp = {}
         result = []
         for notebook in notebooks:
@@ -100,6 +125,16 @@ class NotebooksHandler(BaseRequestHandler):
                                 private=private)
         self.session.add(notebook)
         self.session.commit()
+        if not parent_id:
+            default_section = Notebook(
+                owner_id=notebook.owner_id,
+                owner_type=notebook.owner_type,
+                name='Default Section',
+                parent_id=notebook.id,
+                private=notebook.private
+            )
+            self.session.add(default_section)
+            self.session.commit()
         if not parent_id and not organization_id and not private:
             feed_new_notebook(
                 user_id=self.current_user.id,
