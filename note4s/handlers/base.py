@@ -32,6 +32,7 @@ class BaseRequestHandler(RequestHandler):
         self.set_header('Content-Type', 'application/json')
         self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+        self.set_header('Access-Control-Expose-Headers', 'Content-Type, Content-Disposition')
         if self.request.path.startswith("/api/") and self.request.method != 'GET':
             if not self.current_user:
                 self.api_fail_response("Authorization Required.", 401)

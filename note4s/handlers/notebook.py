@@ -4,12 +4,47 @@
     notebook.py
     ~~~~~~~
 """
-from sqlalchemy import or_, and_
+import tempfile
+import os
+import subprocess
+from sqlalchemy import or_, and_, asc
 from .base import BaseRequestHandler
 from note4s.models import Notebook, OWNER_TYPE, User, Organization, \
     Watch, N_TARGET_TYPE, Note, Membership, O_ROLE
 from note4s.service.feed import feed_new_notebook, feed_notebook_watch
 from note4s.service.notify import notify_notebook_watch
+
+
+def get_authorized_notebook(self, notebook_id):
+    notebook = self.session.query(Notebook).filter_by(id=notebook_id).first()
+    if not notebook:
+        self.api_fail_response(f'Notebook {notebook_id} does not exist.')
+        return
+    if notebook.owner_type == OWNER_TYPE[0]:
+        owner = self.session.query(User).filter_by(id=notebook.owner_id).first()
+    else:
+        owner = self.session.query(Organization).filter_by(id=notebook.owner_id).first()
+    if not owner:
+        self.api_fail_response(f'Notebook {notebook_id} does not belong to any user/organization.')
+        return
+    if notebook.private:
+        if not self.current_user:
+            self.api_fail_response(f'Notebook {notebook_id} does not exist', 404)
+            return
+        if notebook.owner_type == OWNER_TYPE[0]:
+            if notebook.owner_id != self.current_user.id:
+                self.api_fail_response(f'Notebook {notebook_id} does not exist', 404)
+                return
+        else:
+            membership = self.session.query(Membership).filter(
+                Membership.organization_id == notebook.owner_id,
+                Membership.user_id == self.current_user.id,
+                Membership.role != O_ROLE[3]
+            ).count()
+            if membership == 0:
+                self.api_fail_response(f'Notebook {notebook_id} does not exist', 404)
+                return
+    return notebook, owner
 
 
 class NotebooksHandler(BaseRequestHandler):
@@ -146,34 +181,9 @@ class NotebooksHandler(BaseRequestHandler):
 
 class NotebookHandler(BaseRequestHandler):
     def get(self, notebook_id):
-        notebook = self.session.query(Notebook).filter_by(id=notebook_id).first()
-        if not notebook:
-            self.api_fail_response(f'Notebook {notebook_id} does not exist.')
+        notebook, owner = get_authorized_notebook(self, notebook_id)
+        if not notebook or not owner:
             return
-        if notebook.owner_type == OWNER_TYPE[0]:
-            owner = self.session.query(User).filter_by(id=notebook.owner_id).first()
-        else:
-            owner = self.session.query(Organization).filter_by(id=notebook.owner_id).first()
-        if not owner:
-            self.api_fail_response(f'Notebook {notebook_id} does not belong to any user/organization.')
-            return
-        if notebook.private:
-            if not self.current_user:
-                self.api_fail_response(f'Notebook {notebook_id} does not exist', 404)
-                return
-            if notebook.owner_type == OWNER_TYPE[0]:
-                if notebook.owner_id != self.current_user.id:
-                    self.api_fail_response(f'Notebook {notebook_id} does not exist', 404)
-                    return
-            else:
-                membership = self.session.query(Membership).filter(
-                    Membership.organization_id == notebook.owner_id,
-                    Membership.user_id == self.current_user.id,
-                    Membership.role != O_ROLE[3]
-                ).count()
-                if membership == 0:
-                    self.api_fail_response(f'Notebook {notebook_id} does not exist', 404)
-                    return
         owner_info = owner.to_dict()
         notebook_ids = self.session.query(Notebook.id).filter(
             Notebook.owner_id == owner.id,
@@ -332,3 +342,80 @@ class WatchNotebookHandler(BaseRequestHandler):
         self.session.delete(watch)
         self.session.commit()
         self.api_success_response(True)
+
+
+class NotebookPDFHandler(BaseRequestHandler):
+    def get(self, notebook_id):
+        notebook, owner = get_authorized_notebook(self, notebook_id)
+        if not notebook or not owner:
+            return
+        notebook_info = notebook.to_dict()
+        notebook_info["user"] = owner.to_dict()
+        sections = self.session.query(Notebook).filter(
+            Notebook.parent_id == notebook.id
+        ).all()
+        notebook_info["children"] = []
+        note_ids = []
+        if sections:
+            section_ids = [section.id for section in sections]
+            note_notebooks = self.session.query(Notebook).filter(
+                Notebook.parent_id.in_(section_ids)
+            ).all()
+            section_info = {}
+            for index, section in enumerate(sections):
+                section_info[section.id] = index
+                section_dict = section.to_dict()
+                section_dict["children"] = []
+                notebook_info["children"].append(section_dict)
+            for note_notebook in note_notebooks:
+                index = section_info[note_notebook.parent_id]
+                notebook_info["children"][index]["children"].append(note_notebook.to_dict())
+                note_ids.append(note_notebook.note_id)
+        all_notes = self.session.query(Note).filter(
+            Note.notebook_id == notebook_id
+        ).order_by(asc(Note.created)).all()
+        notes = []
+        note_info = {}
+        for note in all_notes:
+            if note.id in note_ids:
+                note.children = []
+                notes.append(note)
+                note_info[note.id] = note
+            else:
+                parent_note = note_info[note.parent_id]
+                parent_note.children.append(note)
+        note_files = []
+        for note in notes:
+            f = tempfile.NamedTemporaryFile(delete=False)
+            f.write((note.title + '\n').encode("utf-8"))
+            f.write('---\n\n'.encode("utf-8"))
+            f.write(note.content.encode("utf-8"))
+            f.close()
+            f.name
+            note_files.append(f.name)
+            for subnote in note.children:
+                sub_f = tempfile.NamedTemporaryFile(delete=False)
+                sub_f.write('--\n\nsubnote--\n\n'.encode("utf-8"))
+                sub_f.write(subnote.content.encode("utf-8"))
+                sub_f.close()
+                sub_f.name
+                note_files.append(sub_f.name)
+        file_list = ' '.join(note_files)
+        cmd_tex = f'pandoc  -f markdown_github --latex-engine=xelatex ' \
+                  f'-V mainfont="AdobeFangsongStd-Regular" -V geometry:margin=1in ' \
+                  f'--toc --smart -N -s --template=note4s.tex {file_list} -o {notebook_id}.tex'
+        p = subprocess.Popen(cmd_tex, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        p.wait()
+        cmd_pdf = f'pandoc --latex-engine=xelatex -V mainfont="AdobeFangsongStd-Regular" ' \
+                  f'-V geometry:margin=1in {notebook_id}.tex -o {notebook_id}.pdf'
+        p = subprocess.Popen(cmd_pdf, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        p.wait()
+        with open(f'{notebook_id}.pdf', 'rb') as f:
+            self.set_header("Content-Type", "application/pdf; charset='utf-8'")
+            self.set_header("Content-Disposition", f'attachment; filename={notebook.name}.pdf')
+            self.write(f.read())
+        for note in note_files:
+            os.remove(note)
+        os.remove(f'{notebook_id}.tex')
+        os.remove(f'{notebook_id}.pdf')
+        self.finish()

@@ -381,7 +381,7 @@ class ContributionHandler(BaseRequestHandler):
 class ActivityHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
         if not self.current_user:
-            self.api_success_response([])
+            self.api_fail_response("Authorization Required.", 401)
             return
         username = self.get_argument("username", None)
         if username:

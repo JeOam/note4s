@@ -39,6 +39,7 @@ api_handlers = [
     (r'/api/notebook/?', notebook.NotebooksHandler),
     (r'/api/notebook/(?P<notebook_id>[0-9a-f]{32}\Z)?', notebook.NotebookHandler),
     (r'/api/notebook/watch/(?P<notebook_id>[0-9a-f]{32}\Z)?', notebook.WatchNotebookHandler),
+    (r'/api/notebook/pdf/(?P<notebook_id>[0-9a-f]{32}\Z)?', notebook.NotebookPDFHandler),
     (r'/api/organization/checkname/', organization.CheckNameHandler),
     (r'/api/organization/', organization.OrganizationHandler),
     (r'/api/organizations/', organization.OrganizationsHandler),

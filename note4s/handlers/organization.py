@@ -77,7 +77,7 @@ class OrganizationHandler(BaseRequestHandler):
 class OrganizationsHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
         if not self.current_user:
-            self.api_success_response([])
+            self.api_fail_response("Authorization Required.", 401)
             return
         memberships = self.session.query(Membership).filter(
             Membership.user_id == self.current_user.id,

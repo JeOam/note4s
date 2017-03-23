@@ -218,9 +218,18 @@ class SubNoteHandler(BaseRequestHandler):
         params = self.get_params()
         content = params.get("content")
         parent_id = params.get('parent_id')
+        if not parent_id:
+            self.api_fail_response(f'parent_id is required.')
+            return
+        parent_note = self.session.query(Note).filter_by(id=parent_id).first()
+        if not parent_note:
+            self.api_fail_response(f'parent_id is invalid.')
+            return
         note = Note(user=self.current_user,
                     content=content,
-                    parent_id=parent_id)
+                    parent_id=parent_id,
+                    section_id=parent_note.section_id,
+                    notebook_id=parent_note.notebook_id)
         self.session.add(note)
         self.session.commit()
         feed_new_subnote(user_id=self.current_user.id,
