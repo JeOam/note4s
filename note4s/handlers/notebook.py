@@ -387,16 +387,14 @@ class NotebookPDFHandler(BaseRequestHandler):
         note_files = []
         for note in notes:
             f = tempfile.NamedTemporaryFile(delete=False)
-            f.write((note.title + '\n').encode("utf-8"))
-            f.write('---\n\n'.encode("utf-8"))
-            f.write(note.content.encode("utf-8"))
+            f.write(f'[NOTE4S_TITLE]{note.title}[/NOTE4S_TITLE]\n'.encode("utf-8"))
+            f.write(f'[NOTE4S_CONTENT]{note.content}[/NOTE4S_CONTENT]\n'.encode("utf-8"))
             f.close()
             f.name
             note_files.append(f.name)
             for subnote in note.children:
                 sub_f = tempfile.NamedTemporaryFile(delete=False)
-                sub_f.write('--\n\nsubnote--\n\n'.encode("utf-8"))
-                sub_f.write(subnote.content.encode("utf-8"))
+                sub_f.write(f'[NOTE4S_SUBNOTE]{subnote.content}[/NOTE4S_SUBNOTE]\n'.encode("utf-8"))
                 sub_f.close()
                 sub_f.name
                 note_files.append(sub_f.name)
@@ -411,8 +409,8 @@ class NotebookPDFHandler(BaseRequestHandler):
         p = subprocess.Popen(cmd_pdf, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         p.wait()
         with open(f'{notebook_id}.pdf', 'rb') as f:
-            self.set_header("Content-Type", "application/pdf; charset='utf-8'")
-            self.set_header("Content-Disposition", f'attachment; filename={notebook.name}.pdf')
+            self.set_header("Content-Type", 'application/pdf; charset="utf-8"')
+            self.set_header("Content-Disposition", f'attachment; filename={notebook_id}.pdf')
             self.write(f.read())
         for note in note_files:
             os.remove(note)
