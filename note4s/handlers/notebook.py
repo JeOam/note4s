@@ -404,8 +404,7 @@ class NotebookPDFHandler(BaseRequestHandler):
                   f'--toc --smart -N -s --template=note4s.tex {file_list} -o {notebook_id}.tex'
         p = subprocess.Popen(cmd_tex, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         p.wait()
-        cmd_pdf = f'pandoc --latex-engine=xelatex -V mainfont="AdobeFangsongStd-Regular" ' \
-                  f'-V geometry:margin=1in {notebook_id}.tex -o {notebook_id}.pdf'
+        cmd_pdf = f'xelatex {notebook_id}.tex'
         p = subprocess.Popen(cmd_pdf, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         p.wait()
         with open(f'{notebook_id}.pdf', 'rb') as f:
@@ -416,4 +415,7 @@ class NotebookPDFHandler(BaseRequestHandler):
             os.remove(note)
         os.remove(f'{notebook_id}.tex')
         os.remove(f'{notebook_id}.pdf')
+        os.remove(f'{notebook_id}.aux')
+        os.remove(f'{notebook_id}.out')
+        os.remove(f'{notebook_id}.toc')
         self.finish()
