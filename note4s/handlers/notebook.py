@@ -7,6 +7,9 @@
 import tempfile
 import os
 import subprocess
+import shutil
+import tempfile
+import requests
 from sqlalchemy import or_, and_, asc
 from .base import BaseRequestHandler
 from note4s.models import Notebook, OWNER_TYPE, User, Organization, \
@@ -404,6 +407,26 @@ class NotebookPDFHandler(BaseRequestHandler):
                   f'--toc --smart -N -s --template=note4s.tex {file_list} -o {notebook_id}.tex'
         p = subprocess.Popen(cmd_tex, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         p.wait()
+        with open(f'{notebook_id}.tex', "r+") as f:
+            content = f.read()
+            content = content.replace('{[}NOTE4S\_SUBNOTE{]}', '\\begin{tcolorbox}\n')
+            content = content.replace('{[}/NOTE4S\_SUBNOTE{]}', '\n\end{tcolorbox}')
+            beginIndex = content.find('\includegraphics{http')
+            while beginIndex != -1:
+                endIndex = content[beginIndex:].find('}')
+                before_url = content[beginIndex: beginIndex + endIndex][17:]
+                response = requests.get(before_url, stream=True)
+                tmp_file = tempfile.NamedTemporaryFile(delete=False)
+                tmp_file.close()
+                with open(tmp_file.name, 'wb') as out_file:
+                    shutil.copyfileobj(response.raw, out_file)
+                del response
+
+                content = content[0:beginIndex] + '\includegraphics{' + tmp_file.name + content[beginIndex + endIndex:]
+                note_files.append(tmp_file.name)
+                beginIndex = content.find('\includegraphics{http')
+            f.seek(0)
+            f.write(content)
         cmd_pdf = f'xelatex {notebook_id}.tex'
         p = subprocess.Popen(cmd_pdf, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         p.wait()
