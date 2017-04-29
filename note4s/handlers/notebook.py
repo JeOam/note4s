@@ -390,27 +390,46 @@ class NotebookPDFHandler(BaseRequestHandler):
         note_files = []
         for note in notes:
             f = tempfile.NamedTemporaryFile(delete=False)
-            f.write(f'[NOTE4S_TITLE]{note.title}[/NOTE4S_TITLE]\n'.encode("utf-8"))
+            f.write(f'[NOTE4S_TITLE]{note.title}[/NOTE4S_TITLE]'
+                    f'[NOTE4S_LABEL]{note.title}[/NOTE4S_LABEL]\n'.encode("utf-8"))
             f.write(f'[NOTE4S_CONTENT]{note.content}[/NOTE4S_CONTENT]\n'.encode("utf-8"))
             f.close()
             f.name
             note_files.append(f.name)
             for subnote in note.children:
                 sub_f = tempfile.NamedTemporaryFile(delete=False)
-                sub_f.write(f'[NOTE4S_SUBNOTE]{subnote.content}[/NOTE4S_SUBNOTE]\n'.encode("utf-8"))
+                sub_f.write(f'[NOTE4S_SUBNOTE {subnote.user.username}•{subnote.updated}]'
+                            f'{subnote.content}[/NOTE4S_SUBNOTE]\n'.encode("utf-8"))
                 sub_f.close()
                 sub_f.name
                 note_files.append(sub_f.name)
         file_list = ' '.join(note_files)
         cmd_tex = f'pandoc  -f markdown_github --latex-engine=xelatex ' \
-                  f'-V mainfont="AdobeFangsongStd-Regular" -V geometry:margin=1in ' \
-                  f'--toc --smart -N -s --template=note4s.tex {file_list} -o {notebook_id}.tex'
+                  f'--toc --template=note4s.tex {file_list} -o {notebook_id}.tex'
         p = subprocess.Popen(cmd_tex, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         p.wait()
         with open(f'{notebook_id}.tex', "r+") as f:
             content = f.read()
-            content = content.replace('{[}NOTE4S\_SUBNOTE{]}', '\\begin{tcolorbox}\n')
+
+            beginIndex = content.find('{[}NOTE4S\_SUBNOTE')
+            while beginIndex != -1:
+                endIndex = content[beginIndex:].find('{]}')
+                subnote = content[beginIndex: beginIndex + endIndex + 3]
+                splits = subnote[19:].split('•')
+                username = splits[0]
+                time = splits[1][:19]
+                content = content.replace(subnote, '\\begin{tcolorbox}[arc=0.1mm, colback=white, ' \
+                                                   'colframe=lightgray, coltitle=black, title=' + \
+                                                   f'{username} • {time}' + ']\n')
+                beginIndex = content.find('{[}NOTE4S\_SUBNOTE')
             content = content.replace('{[}/NOTE4S\_SUBNOTE{]}', '\n\end{tcolorbox}')
+            content = content.replace('{[}NOTE4S\_TITLE{]}', '\n\chapter{')
+            content = content.replace('{[}/NOTE4S\_TITLE{]}', '}')
+            content = content.replace('{[}NOTE4S\_LABEL{]}', '\label{')
+            content = content.replace('{[}/NOTE4S\_LABEL{]}', '}\n')
+            content = content.replace('{[}NOTE4S\_CONTENT{]}', '')
+            content = content.replace('{[}/NOTE4S\_CONTENT{]}', '')
+
             beginIndex = content.find('\includegraphics{http')
             while beginIndex != -1:
                 endIndex = content[beginIndex:].find('}')
@@ -421,8 +440,8 @@ class NotebookPDFHandler(BaseRequestHandler):
                 with open(tmp_file.name, 'wb') as out_file:
                     shutil.copyfileobj(response.raw, out_file)
                 del response
-
-                content = content[0:beginIndex] + '\includegraphics{' + tmp_file.name + content[beginIndex + endIndex:]
+                content = content[0:beginIndex] + '\includegraphics{' + \
+                          tmp_file.name + content[beginIndex + endIndex:]
                 note_files.append(tmp_file.name)
                 beginIndex = content.find('\includegraphics{http')
             f.seek(0)
@@ -436,7 +455,8 @@ class NotebookPDFHandler(BaseRequestHandler):
             self.write(f.read())
         for note in note_files:
             os.remove(note)
-        os.remove(f'{notebook_id}.tex')
+        # os.remove(f'{notebook_id}.tex')
+        os.remove(f'{notebook_id}.log')
         os.remove(f'{notebook_id}.pdf')
         os.remove(f'{notebook_id}.aux')
         os.remove(f'{notebook_id}.out')
