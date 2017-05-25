@@ -4,7 +4,6 @@
     notebook.py
     ~~~~~~~
 """
-import tempfile
 import os
 import subprocess
 import shutil
@@ -92,10 +91,11 @@ class NotebooksHandler(BaseRequestHandler):
                         and_(
                             Notebook.owner_id == user.id,
                             Notebook.owner_type == OWNER_TYPE[0]
-                        ), and_(
+                        ),
+                        and_(
                             Notebook.owner_id.in_(organization_ids),
                             Notebook.owner_type == OWNER_TYPE[1]
-                        )
+                        ) if len(organization_ids) > 0 else False
                     )
                 ).all()
             else:
@@ -104,12 +104,13 @@ class NotebooksHandler(BaseRequestHandler):
                         and_(
                             Notebook.owner_id == user.id,
                             Notebook.owner_type == OWNER_TYPE[0],
-                            Notebook.private == False
-                        ), and_(
+                            Notebook.private.is_(False)
+                        ),
+                        and_(
                             Notebook.owner_id.in_(organization_ids),
                             Notebook.owner_type == OWNER_TYPE[1],
-                            Notebook.private == False
-                        )
+                            Notebook.private.is_(False)
+                        ) if len(organization_ids) > 0 else False
                     )
                 ).all()
         temp = {}
