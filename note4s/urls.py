@@ -10,7 +10,8 @@ from note4s.handlers import (
     note,
     notebook,
     organization,
-    user
+    user,
+    upload
 )
 
 api_handlers = [
@@ -19,6 +20,7 @@ api_handlers = [
     (r'/auth/register/?', user.RegisterHandler),
     (r'/auth/checkusername/', user.CheckHandler),
     (r'/api/profile/', user.ProfileHandler),
+    (r'/api/profile/(?P<user_id>[0-9a-f]{32}\Z)?', user.ProfileHandler),
     (r'/api/user/mention/', user.MentionHandler),
     (r'/api/user/notification/', user.NotificationHandler),
     (r'/api/user/contribution/', user.ContributionHandler),
@@ -47,7 +49,9 @@ api_handlers = [
     (r'/api/organization/people/', organization.PeopleHandler),
     (r'/api/organization/invite/', organization.InviteHandler),
     (r'/api/organization/accept/', organization.AcceptHandler),
-    (r'/api/organization/checkmembership/', organization.CheckMembershipHandler)
+    (r'/api/organization/checkmembership/', organization.CheckMembershipHandler),
+    (r'/api/upload/', upload.UploadHandler),
+    (r'/api/file/(?P<filename>[0-9a-f]{32}.(?:jpg|gif|png)\Z)?', upload.FileHandler)
 ]
 
 handlers = api_handlers

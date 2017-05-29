@@ -156,6 +156,12 @@ class ProfileHandler(BaseRequestHandler):
             result["organizations"] = []
         self.api_success_response(result)
 
+    def put(self, *args, **kwargs):
+        keys = set(['nickname', 'email', 'avatar'])
+        self.update_modal(self.current_user, keys)
+        self.session.commit()
+        self.api_success_response(True)
+
 
 class FollowHandler(BaseRequestHandler):
     def post(self):

@@ -18,6 +18,8 @@ GITHUB_SECRET = os.environ.get("GITHUB_ID", "426b6e5feecf23c58187b99cc2854382592
 PG_URL = os.environ.get("PG_URL", "postgres+psycopg2://note4s:note4s@127.0.0.1:5432/note4s?sslmode=disable")
 GIT_DIR = os.environ.get("GIT_DIR", "GIT_DIR/")
 
+FILE_FOLDER = './Upload/'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,

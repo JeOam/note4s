@@ -29,15 +29,21 @@ class BaseRequestHandler(RequestHandler):
 
     def prepare(self):
         self.set_header('Access-Control-Allow-Origin', '*')
-        self.set_header('Content-Type', 'application/json')
+        self.set_header('Content-Type', 'application/json; charset=UTF-8')
         self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
         self.set_header('Access-Control-Expose-Headers', 'Content-Type, Content-Disposition')
-        if self.request.path.startswith("/api/") and self.request.method != 'GET':
+        if self.request.path.startswith("/api/") and \
+           self.request.method != 'GET' and \
+           self.request.method != 'OPTIONS':
             if not self.current_user:
                 self.api_fail_response("Authorization Required.", 401)
 
     def options(self, *args, **kwargs):
+        self.write({
+            "code": 200,
+            "message": 'success'
+        })
         self.finish()
 
     def get_params(self):
@@ -73,10 +79,10 @@ class BaseRequestHandler(RequestHandler):
         """
         返回成功的结果
         """
-        self.write(json.dumps({
+        self.write({
             'code': code,
             "data": data
-        }))
+        })
         self.finish()
 
     def write_error(self, status_code, **kwargs):
