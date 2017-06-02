@@ -44,6 +44,7 @@ api_handlers = [
     (r'/api/notebook/pdf/(?P<notebook_id>[0-9a-f]{32}\Z)?', notebook.NotebookPDFHandler),
     (r'/api/organization/checkname/', organization.CheckNameHandler),
     (r'/api/organization/', organization.OrganizationHandler),
+    (r'/api/organization/(?P<organization_id>[0-9a-f]{32}\Z)?', organization.OrganizationHandler),
     (r'/api/organizations/', organization.OrganizationsHandler),
     (r'/api/organization/notebook/', organization.NotebookHandler),
     (r'/api/organization/people/', organization.PeopleHandler),

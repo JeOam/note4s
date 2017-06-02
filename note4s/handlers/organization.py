@@ -73,6 +73,16 @@ class OrganizationHandler(BaseRequestHandler):
         self.session.commit()
         self.api_success_response(True)
 
+    def put(self, organization_id):
+        organization = self.session.query(Organization).filter_by(id=organization_id).first()
+        if not organization:
+            self.api_fail_response("organization id is invalid.")
+            return
+        keys = set(['desc', 'avatar'])
+        self.update_modal(organization, keys)
+        self.session.commit()
+        self.api_success_response(True)
+
 
 class OrganizationsHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
@@ -114,10 +124,13 @@ class NotebookHandler(BaseRequestHandler):
             Notebook.parent_id.is_(None)
         ).all()
         notebook_ids = [notebook.id for notebook in notebooks]
-        watches = self.session.query(Watch.target_id, func.count(Watch.id)).filter(
-            Watch.target_id.in_(notebook_ids),
-            Watch.target_type == N_TARGET_TYPE[3]
-        ).group_by(Watch.target_id).all()
+        if notebook_ids:
+            watches = self.session.query(Watch.target_id, func.count(Watch.id)).filter(
+                Watch.target_id.in_(notebook_ids),
+                Watch.target_type == N_TARGET_TYPE[3]
+            ).group_by(Watch.target_id).all()
+        else:
+            watches = []
         watch_info = {}
         for watch in watches:
             watch_info[watch[0]] = watch[1]
