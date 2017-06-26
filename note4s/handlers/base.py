@@ -86,10 +86,26 @@ class BaseRequestHandler(RequestHandler):
         self.finish()
 
     def write_error(self, status_code, **kwargs):
-        if self.settings.get("serve_traceback") and "exc_info" in kwargs:
-            # in debug mode, print traceback message
-            logging.error(*kwargs["exc_info"])
-        super().write_error(status_code, **kwargs)
+        if self.__class__ == BaseRequestHandler:
+            if 400 <= status_code < 500:
+                self.set_status(200)
+                self.write({
+                    'code': status_code,
+                    "data": 'Invalid Request'
+                })
+                self.finish()
+            elif status_code >= 500:
+                self.set_status(200)
+                self.write({
+                    'code': status_code,
+                    "data": 'Something went wrong,we will Fix it soon,you may please try again'
+                })
+                self.finish()
+        else:
+            if self.settings.get("serve_traceback") and "exc_info" in kwargs:
+                # in debug mode, print traceback message
+                logging.error(*kwargs["exc_info"])
+            super().write_error(status_code, **kwargs)
 
     def on_finish(self):
         self.session.close()
