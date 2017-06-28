@@ -27,12 +27,14 @@ class BaseRequestHandler(RequestHandler):
                 else:
                     logging.error(f'No user with id {user_id}')
 
-    def prepare(self):
+    def config_headers(self):
         self.set_header('Access-Control-Allow-Origin', '*')
         self.set_header('Content-Type', 'application/json; charset=UTF-8')
         self.set_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.set_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-        self.set_header('Access-Control-Expose-Headers', 'Content-Type, Content-Disposition')
+
+    def prepare(self):
+        self.config_headers()
         if self.request.path.startswith("/api/") and \
            self.request.method != 'GET' and \
            self.request.method != 'OPTIONS':
@@ -80,7 +82,7 @@ class BaseRequestHandler(RequestHandler):
         返回成功的结果
         """
         self.write({
-            'code': code,
+            "code": code,
             "data": data
         })
         self.finish()
