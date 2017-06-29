@@ -44,7 +44,7 @@ class BaseRequestHandler(RequestHandler):
     def options(self, *args, **kwargs):
         self.write({
             "code": 200,
-            "message": 'success'
+            "message": "success"
         })
         self.finish()
 
@@ -93,14 +93,14 @@ class BaseRequestHandler(RequestHandler):
                 self.set_status(200)
                 self.write({
                     'code': status_code,
-                    "data": 'Invalid Request'
+                    'message': 'Invalid Request'
                 })
                 self.finish()
             elif status_code >= 500:
                 self.set_status(200)
                 self.write({
                     'code': status_code,
-                    "data": 'Something went wrong,we will Fix it soon,you may please try again'
+                    'message': 'Something went wrong,we will Fix it soon,you may please try again'
                 })
                 self.finish()
         else:

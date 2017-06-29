@@ -42,10 +42,12 @@ class NoteTestCase(BaseHTTPTestCase):
 
     def test_note_detail_url(self):
         result = self.get('/api/note/123')
-        assert result == '<html><title>404: Not Found</title><body>404: Not Found</body></html>'
-
+        assert isinstance(result, dict)
+        assert result["code"] == 405
+        assert result["message"] == 'Invalid Request'
         result = self.get('/api/note/123456789012345678901234567890123')
-        assert result == '<html><title>404: Not Found</title><body>404: Not Found</body></html>'
+        assert result["code"] == 405
+        assert result["message"] == 'Invalid Request'
 
     @pytest.mark.usefixtures("note", "token")
     def test_note_detail(self):
