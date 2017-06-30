@@ -19,6 +19,7 @@ PG_URL = os.environ.get("PG_URL", "postgres+psycopg2://note4s:note4s@127.0.0.1:5
 GIT_DIR = os.environ.get("GIT_DIR", "GIT_DIR/")
 
 FILE_FOLDER = './Upload/'
+ONE_TOKEN_VALID_ONLY = False
 
 LOGGING = {
     'version': 1,

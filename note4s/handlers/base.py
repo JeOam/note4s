@@ -9,6 +9,7 @@ import logging
 from tornado.web import RequestHandler
 from note4s.models import Session, User
 from note4s.utils import extract_jwt
+from note4s.settings import ONE_TOKEN_VALID_ONLY
 
 
 class BaseRequestHandler(RequestHandler):
@@ -19,11 +20,15 @@ class BaseRequestHandler(RequestHandler):
     def get_current_user(self):
         token = self.request.headers.get("Authorization")
         if token:
-            user_id = extract_jwt(token)
+            timestamp, user_id = extract_jwt(token)
             if user_id:
                 user = self.session.query(User).filter_by(id=user_id).one_or_none()
                 if user:
-                    return user
+                    if ONE_TOKEN_VALID_ONLY:
+                        if user.token_time == timestamp:
+                            return user
+                    else:
+                        return user
                 else:
                     logging.error(f'No user with id {user_id}')
 

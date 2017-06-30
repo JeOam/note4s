@@ -68,15 +68,15 @@ def another_user(database, request):
 
 @pytest.fixture(scope="function")
 def token(user, request):
-    token = create_jwt(user_id=user.id.hex).decode("utf-8")
-    request.cls.token = token
+    _, token = create_jwt(user_id=user.id.hex)
+    request.cls.token = token.decode("utf-8")
     return token
 
 
 @pytest.fixture(scope="function")
 def another_token(another_user, request):
-    token = create_jwt(user_id=another_user.id.hex).decode("utf-8")
-    request.cls.another_token = token
+    _, token = create_jwt(user_id=another_user.id.hex)
+    request.cls.another_token = token.decode("utf-8")
     return token
 
 

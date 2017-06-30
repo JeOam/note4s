@@ -35,17 +35,18 @@ class GithubCallbackHandler(BaseRequestHandler):
                                     nickname=userinfo.get('name'),
                                     avatar=userinfo.get('avatar_url'),
                                     email=userinfo.get('email'))
-                        self.session.add(user)
-                        self.session.commit()
+
                         create_git_repo(user.id.hex)
                     else:
                         user.nickname = userinfo.get('name')
                         user.avatar = userinfo.get('avatar_url')
                         user.email = userinfo.get('email')
-                        self.session.add(user)
-                        self.session.commit()
+                    timestamp, token = create_jwt(user.id.hex)
+                    user.token_time = timestamp
+                    self.session.add(user)
+                    self.session.commit()
                     return self.redirect(f'http://localhost:8088/redirect?'
-                                         f'token={create_jwt(user.id.hex).decode("utf-8")}&'
+                                         f'token={token.decode("utf-8")}&'
                                          f'state={self.get_argument("state")}')
         else:
             error = self.get_argument('error')

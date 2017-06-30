@@ -33,7 +33,11 @@ class LoginHandler(BaseRequestHandler):
             self.api_fail_response('Login Failed. Please check you account and password.')
             return
         else:
-            self.api_success_response(create_jwt(user.id.hex).decode("utf-8"))
+            timestamp, token = create_jwt(user.id.hex)
+            user.token_time = timestamp
+            self.session.add(user)
+            self.session.commit()
+            self.api_success_response(token.decode("utf-8"))
 
 
 class RegisterHandler(BaseRequestHandler):
@@ -297,6 +301,8 @@ class FollowingHandler(BaseRequestHandler):
 
 class NotificationHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
+        if not self.current_user:
+            return self.api_success_response([])
         user_notifications = self.session.query(
             UserNotification
         ).filter_by(

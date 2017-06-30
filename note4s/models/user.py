@@ -6,7 +6,8 @@
 """
 from sqlalchemy import (
     Column,
-    String
+    String,
+    TIMESTAMP
 )
 
 from .base import BaseModel
@@ -18,3 +19,4 @@ class User(BaseModel):
     email = Column(String(64), unique=True)
     password = Column(String(128))
     avatar = Column(String(128))
+    token_time = Column(TIMESTAMP)
