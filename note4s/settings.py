@@ -20,6 +20,9 @@ GIT_DIR = os.environ.get("GIT_DIR", "GIT_DIR/")
 
 FILE_FOLDER = './Upload/'
 ONE_TOKEN_VALID_ONLY = False
+DEBUG = os.environ.get("DEBUG", True)
+PORT = os.environ.get("PORT", 8888)
+
 
 LOGGING = {
     'version': 1,

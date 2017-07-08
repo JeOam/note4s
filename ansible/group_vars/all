@@ -1,0 +1,7 @@
+server_domain: "api.note4s.com"
+
+backend_repo_source: "git@git.coding.net:jeoam/note4s.git"
+backend_repo_destination: "/home/ansible/Note4s"
+backend_branch: "tornado"
+
+virtualenv_path: "/home/ansible/virtualenv"

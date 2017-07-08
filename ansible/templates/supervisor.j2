@@ -1,0 +1,14 @@
+[program:note4s]
+command={{ virtualenv_path }}/Note4s/bin/python main.py  localhost:9527
+process_name=note4s
+numprocs=1
+numprocs_start=1
+autostart=true
+autorestart=true
+redirect_stderr=true
+environment=PATH="{{ virtualenv_path }}/Note4s/bin",
+            PORT=9527,
+            DEBUG=false
+directory={{ backend_repo_destination }}/
+stopwaitsecs = 600
+killasgroup=true

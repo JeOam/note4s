@@ -24,7 +24,14 @@ def reload_hook():
 
 if __name__ == "__main__":
     logging.config.dictConfig(settings.LOGGING)
-    autoreload._reload_hooks.append(reload_hook)
-    app = app(debug=True)
-    app.listen(8888)
+    if settings.DEBUG:
+        print(f'''
+
+    ******************
+    Server loaded at {datetime.now()}
+    ******************
+            ''')
+        autoreload._reload_hooks.append(reload_hook)
+    app = app(debug=settings.DEBUG)
+    app.listen(settings.PORT)
     tornado.ioloop.IOLoop.current().start()

@@ -1,0 +1,22 @@
+upstream note4s_server {
+    server 127.0.0.1:9527;
+}
+
+server {
+    listen 80;
+    listen 443 ssl;
+
+    server_name {{ server_domain }}
+    gzip on;
+
+    ssl_certificate /etc/nginx/ssl/nginx.crt;
+    ssl_certificate_key /etc/nginx/ssl/nginx.key;
+
+    location / {
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme $scheme;
+        proxy_pass http://note4s_server;
+    }
+}

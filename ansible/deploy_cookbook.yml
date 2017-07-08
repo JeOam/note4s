@@ -1,0 +1,28 @@
+---
+- name: Deploy GFTools Project With Latest Source Code
+  hosts: all
+  tasks:
+    - name: Get the lastest version source code
+      git: repo={{ backend_repo_source }}
+           dest={{ backend_repo_destination }}
+           accept_hostkey=True
+           version={{ backend_branch }}
+           force=yes
+
+    - name: Setup virtualenv for Note4s
+      pip: requirements={{ backend_repo_destination }}/requirements.txt
+           virtualenv={{ virtualenv_path }}/Note4s
+    
+    - name: Update Note4s nginx config
+      template: src=templates/nginx_conf.j2
+                dest=/etc/nginx/conf.d/note4s.conf
+    
+    - name: Update supervisor configuration
+      template: src=templates/supervisor.j2
+                dest=/etc/supervisor/conf.d/note4s.conf
+    
+    - name: Restart Note4s processs
+      supervisorctl: name=note4s state=restarted
+
+    - name: Reload nginx
+      service: name=nginx state=reloaded
