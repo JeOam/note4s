@@ -4,8 +4,10 @@
     test_utils.py
     ~~~~~~~
 """
+import pytest
 from note4s.utils.mail import sent_mail
 
+@pytest.mark.webtest
 def test_mail():
     with open('note4s/utils/registration_code.html') as f:
         content = f.read()
