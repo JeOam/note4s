@@ -5,7 +5,7 @@
     ~~~~~~~
 """
 import pytest
-from note4s.utils.mail import sent_mail
+from note4s.utils import sent_mail, random_with_N_digits
 
 @pytest.mark.webtest
 def test_mail():
@@ -19,3 +19,11 @@ def test_mail():
             content=content
         )
         assert result is True
+
+
+def test_random_with_N_digits():
+    code1 = random_with_N_digits(6)
+    code2 = random_with_N_digits(6)
+    assert len(str(code1)) == 6
+    assert len(str(code2)) == 6
+    assert code1 != code2

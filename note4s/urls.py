@@ -19,6 +19,7 @@ api_handlers = [
     (r'/auth/login/', user.LoginHandler),
     (r'/auth/register/?', user.RegisterHandler),
     (r'/auth/checkusername/', user.CheckHandler),
+    (r'/auth/verifycode/', user.VerifyCodeHandler),
     (r'/api/profile/', user.ProfileHandler),
     (r'/api/profile/(?P<user_id>[0-9a-f]{32}\Z)?', user.ProfileHandler),
     (r'/api/user/mention/', user.MentionHandler),

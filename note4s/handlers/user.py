@@ -12,7 +12,8 @@ from note4s.models import User, Watch, N_TARGET_TYPE, \
     UserNotification, Notification, N_ACTION, \
     Note, Notebook, OWNER_TYPE, Star, Activity, \
     Organization, Membership
-from note4s.utils import create_jwt
+from note4s.utils import create_jwt, sent_mail, \
+    is_valid_email, random_with_N_digits, redis
 from note4s.service.notify import notify_user_follow
 from note4s.service.feed import feed_follow_user
 from note4s.service.git import create_git_repo
@@ -43,17 +44,21 @@ class LoginHandler(BaseRequestHandler):
 class RegisterHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
         params = self.get_params()
-        username = params.get("username", None)
-        email = params.get("email", None)
-        password = params.get("password", None)
-        if (not email) or (not password) or (not username):
+        username = params.get("username")
+        email = params.get("email")
+        password = params.get("password")
+        code = params.get("code")
+        if (not email) or (not password) or (not username) or (not code):
             self.api_fail_response("Not Enough Fields")
             return
         user = self.session.query(User).filter_by(username=username).first()
         if user:
             self.api_fail_response("username is invalid.")
             return
-
+        cache_code = redis.get(f'registration_code_{email}')
+        if not cache_code or (code != cache_code.decode()):
+            self.api_fail_response("verify code is invalid.")
+            return
         user = User(username=username,
                     email=email,
                     password=generate_password_hash(password))
@@ -61,7 +66,6 @@ class RegisterHandler(BaseRequestHandler):
         self.session.commit()
         create_git_repo(user.id.hex)
         self.api_success_response(user.to_dict())
-
 
 
 class CheckHandler(BaseRequestHandler):
@@ -73,6 +77,30 @@ class CheckHandler(BaseRequestHandler):
             self.api_success_response(True)
         else:
             self.api_success_response(False)
+
+
+class VerifyCodeHandler(BaseRequestHandler):
+    def post(self, *args, **kwargs):
+        params = self.get_params()
+        email = params.get("email", None)
+        if not email:
+            self.api_fail_response("email cannot be empty.")
+            return
+        if not is_valid_email(email):
+            self.api_fail_response("email is invalid")
+            return
+        with open('note4s/utils/registration_code.html') as f:
+            content = f.read()
+            code = random_with_N_digits(6)
+            redis.set(f'registration_code_{email}', code, 1800)
+            content = content.replace('registration_code', str(code))
+            sent_mail(
+                from_mail='Note4s <no-reply@note4s.com>',
+                to_mail=email,
+                title="Verify your email address",
+                content=content
+            )
+            self.api_success_response(True)
 
 
 class MentionHandler(BaseRequestHandler):

@@ -7,6 +7,7 @@
 import requests
 from note4s import settings
 
+
 def sent_mail(from_mail, to_mail, title, content):
     result = requests.post(
         "https://api.mailgun.net/v3/mg.note4s.com/messages",

@@ -11,9 +11,34 @@ from note4s.models import Watch, N_TARGET_TYPE, Notification, Activity
 from note4s import settings
 from .base import BaseHTTPTestCase
 from .conftest import session
-
+from note4s.utils import redis
 
 class UserTestCase(BaseHTTPTestCase):
+    def test_email_verify_and_register(self):
+        data = {
+            'email': 'test@test.com'
+        }
+        result = self.post('/auth/verifycode/', body=data)
+        assert isinstance(result, dict)
+        assert result["code"] == 200
+        assert result["data"] is True
+        code = redis.get(f'registration_code_{data["email"]}')
+        assert len(code) == 6
+
+        data = {
+            'username': 'test',
+            'email': 'test@test.com',
+            'password': 'admin123',
+            'code': code.decode()
+        }
+        result = self.post('/auth/register/', body=data)
+        assert isinstance(result, dict)
+        assert result["code"] == 200
+        assert result["data"]["id"]
+        assert result["data"]["email"] == data["email"]
+        assert not result["data"].get("password")
+        shutil.rmtree(settings.GIT_DIR + result["data"]["id"], ignore_errors=True)
+
     @pytest.mark.usefixtures("user")
     def test_login(self):
         data = {
@@ -24,20 +49,6 @@ class UserTestCase(BaseHTTPTestCase):
         assert isinstance(result, dict)
         assert result["code"] == 200
         assert len(result["data"]) >= 171
-
-    def test_register(self):
-        data = {
-            'username': 'test',
-            'email': 'test@test.com',
-            'password': 'admin123'
-        }
-        result = self.post('/auth/register/', body=data)
-        assert isinstance(result, dict)
-        assert result["code"] == 200
-        assert result["data"]["id"]
-        assert result["data"]["email"] == data["email"]
-        assert not result["data"].get("password")
-        shutil.rmtree(settings.GIT_DIR + result["data"]["id"], ignore_errors=True)
 
 
     @pytest.mark.usefixtures("note", "user", "token", "another_user", "another_token")
