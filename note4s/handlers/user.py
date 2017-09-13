@@ -55,6 +55,10 @@ class RegisterHandler(BaseRequestHandler):
         if user:
             self.api_fail_response("username is invalid.")
             return
+        user = self.session.query(User).filter_by(email=email).first()
+        if user:
+            self.api_fail_response("email has been registered.")
+            return
         cache_code = redis.get(f'registration_code_{email}')
         if not cache_code or (code != cache_code.decode()):
             self.api_fail_response("verify code is invalid.")
